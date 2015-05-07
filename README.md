@@ -2,8 +2,31 @@
 
 A Minecraft package manager for mods
 
+## Prerequisites
+
+ - Download Minecraft
+ - Have valid Minecraft account
+ - Download Minecraft Forge Installer from http://files.minecraftforge.net/maven/net/minecraftforge/forge/index_1.7.10.html
+ - Run the Forge installer
+ - Inside Minecraft, create or edit a profile where "Use Version:" is set to
+   the forge version just installed
+
+## Installation
+
+ - Clone this repo
+ - Symlink the `creep` file into your `$PATH`
+
+## Usage
+
+ - `creep list` - will list all the known packages (mods) in the repository
+ - `creep install <package>` - will install the package to your `~/.minecraft/mods` folder
+ - `creep uninstall <package>` - will remove the package from your mods folder
+
+The mod files are stored in a cache directory in `~/.creep/cache`
+
 ## Future Plans
 
+ - Support dependencies
  - Have a registry where people can define their mods
 
 Example mod.json

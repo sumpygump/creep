@@ -23,12 +23,91 @@
         "keywords": "storage, chest, locks, keys, lockers",
         "require": {
           "minecraft": "1.7.10",
-          "forge": ">=10.13.2.1230"
+          "forge": ">=10.13.2.1291"
         },
         "filename": "BetterStorage-1.7.10-0.13.1.126.jar",
         "url": "https://github.com/copygirl/BetterStorage/releases/download/v0.13.1.126/BetterStorage-1.7.10-0.13.1.126.jar",
         "author": "copygirl",
         "homepage": "https://github.com/copygirl/BetterStorage"
+      }
+    },
+    "rich1051414/damage-indicators": {
+      "3.2.3": {
+        "name": "rich1051414/damage-indicators",
+        "version": "3.2.3",
+        "description": "Display damage statistics for mobs",
+        "keywords": "damage, mobs, indicator, rpg, ui",
+        "require": {
+          "minecraft": "1.7.10",
+          "forge": ">=10.13.2.1291"
+        },
+        "filename": "[1.7.10]DamageIndicatorsMod-3.2.3.jar",
+        "author": "rich1051414",
+        "homepage": "http://www.minecraftforum.net/forums/mapping-and-modding/minecraft-mods/1286538-hit-splat-damage-indicators-v3-3-2-rpg-ui-and"
+      }
+    },
+    "mine-and-blade/battlegear2": {
+      "1.0.7.0": {
+        "name": "mine-and-blade/battlegear2",
+        "version": "1.0.7.0",
+        "description": "Introduces a new weapon system",
+        "keywords": "weapons, combat, shields, arrows, armor, armour",
+        "require": {
+          "minecraft": "1.7.10",
+          "forge": ">=10.13.2.1291"
+        },
+        "filename": "1.7.10-MB_Battlegear2-Bullseye-1.0.7.0.jar",
+        "url": "http://addons-origin.cursecdn.com/files/2225/110/1.7.10-MB_Battlegear2-Bullseye-1.0.7.0.jar",
+        "author": "Nerd_Boy",
+        "homepage": "http://www.minecraftforum.net/forums/mapping-and-modding/minecraft-mods/1291267-mine-blade-battlegear-2-bullseye-1-0-7-0"
+      }
+    },
+    "ae/applied-energistics2": {
+      "rv2-stable-1": {
+        "name": "ae/applied-energistics2",
+        "version": "rv2-stable-1",
+        "description": "Provides energy related content",
+        "keywords": "energy, me network, worldgen, decorative blocks, storage cells, tools",
+        "require": {
+          "minecraft": "1.7.10",
+          "forge": ">=10.13.2.1291"
+        },
+        "filename": "appliedenergistics2-rv2-stable-1.jar",
+        "url": "http://ae-mod.info/builds/appliedenergistics2-rv2-stable-1.jar",
+        "author": "AlgorithmX2",
+        "homepage": "http://ae-mod.info/"
+      }
+    },
+    "cofh/cofh-core": {
+      "3.0.2-262": {
+        "name": "cofh/cofh-core",
+        "version": "3.0.2-262",
+        "description": "Core functionality for Team CoFH mods",
+        "keywords": "cofh, core",
+        "require": {
+          "minecraft": "1.7.10",
+          "forge": ">=10.13.2.1291"
+        },
+        "filename": "CoFHCore-[1.7.10]3.0.2-262.jar",
+        "url": "http://addons-origin.cursecdn.com/files/2234/198/CoFHCore-[1.7.10]3.0.2-262.jar",
+        "author": "TeamCoFH",
+        "homepage": "http://minecraft.curseforge.com/mc-mods/69162-cofhcore"
+      }
+    },
+    "shukaro/artifice": {
+      "1.1.4-310": {
+        "name": "shukaro/artifice",
+        "version": "1.1.4-310",
+        "description": "Adds worldgen, new blocks and new items",
+        "keywords": "worldgen, frames, boxes, sledges, pavers, sickles",
+        "require": {
+          "minecraft": "1.7.10",
+          "forge": ">=10.13.2.1291",
+          "cofh/cofh-core": ">=3.0.2-262"
+        },
+        "filename": "Artifice-1.7.10-1.1.4-310.jar",
+        "author": "Shukaro",
+        "homepage": "http://www.minecraftforum.net/forums/mapping-and-modding/minecraft-mods/1290031-1-6-x-1-7-x-artifice-the-correct-term-is-mauve"
       }
     }
   }
