@@ -2,12 +2,13 @@
 
 import sys # System specific parameters and functions
 
-from CreepClient import CreepClient
+from creepclient.creepclient import CreepClient
 
 if __name__ == "__main__":
     client = CreepClient()
 
     if len(sys.argv) > 1:
+        # Use the client to execute the command from argv
         status = client.onecmd(' '.join(sys.argv[1:]))
     else:
         print "  ____                     "
@@ -17,8 +18,7 @@ if __name__ == "__main__":
         print " \____|_|  \___|\___| .__/ "
         print "                    |_|    "
 
-        # TODO: Show help here?
-        status = 1
+        status = client.onecmd('help')
 
     sys.exit(status)
 

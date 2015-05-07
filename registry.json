@@ -1,0 +1,35 @@
+{
+  "packages": {
+    "thefrogmc/better-furnaces": {
+      "4.3": {
+        "name": "thefrogmc/better-furnaces",
+        "version": "4.3",
+        "description": "Adds some new furnaces to the game",
+        "keywords": "iron furnace, gold furnace, diamond furnace, hell furnace, extreme furnace",
+        "require": {
+          "minecraft": "1.7.10",
+          "forge": "*"
+        },
+        "filename": "[1.7.10]Better_Furnaces_V4.3.jar",
+        "author": "TheFrogMC",
+        "homepage": "http://www.minecraftforum.net/forums/mapping-and-modding/minecraft-mods/1279439-better-furnaces-mod"
+      }
+    },
+    "copygirl/better-storage": {
+      "0.13.1.126": {
+        "name": "copygirl/better-storage",
+        "version": "0.13.1.126",
+        "description": "Offers more storage options",
+        "keywords": "storage, chest, locks, keys, lockers",
+        "require": {
+          "minecraft": "1.7.10",
+          "forge": ">=10.13.2.1230"
+        },
+        "filename": "BetterStorage-1.7.10-0.13.1.126.jar",
+        "url": "https://github.com/copygirl/BetterStorage/releases/download/v0.13.1.126/BetterStorage-1.7.10-0.13.1.126.jar",
+        "author": "copygirl",
+        "homepage": "https://github.com/copygirl/BetterStorage"
+      }
+    }
+  }
+}
