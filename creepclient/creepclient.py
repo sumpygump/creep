@@ -51,24 +51,39 @@ class CreepClient(Client, cmd.Cmd):
 
     def do_install(self, args):
         """Install a package (mod)"""
-        if args == '':
-            print 'Missing package name'
-            return 2
-        if args not in self.repository:
-            print 'Unknown package {}'.format(args)
-            return 3
-        
-        cachedir = self.appdir + os.sep + 'cache'
-        package = self.repository[args]
 
+        package = self.fetch_package(args)
+        if not package:
+            return 1
+
+        cachedir = self.appdir + os.sep + 'cache'
         if not os.path.isfile(cachedir + os.sep + package.filename):
-            print "Downloading package {0} from {1}".format(package.name, package.url)
+            print "Downloading package {0} from {1}".format(package.name, package.get_download_location())
             package.download(cachedir)
 
         savedir = self.minecraftdir + os.sep + package.installdir 
         shutil.copyfile(cachedir + os.sep + package.filename, savedir + os.sep + package.filename)
 
         print "Installed mod '{0}' in '{1}'".format(package.name, savedir + os.sep + package.filename)
+
+    def do_uninstall(self, args):
+        package = self.fetch_package(args)
+        if not package:
+            return 1
+
+        savedir = self.minecraftdir + os.sep + package.installdir 
+        os.remove(savedir + os.sep + package.filename)
+        print "Removed mod '{0}' from '{1}'".format(package.name, savedir)
+
+    def fetch_package(self, name):
+        if name == '':
+            print 'Missing package name'
+            return False
+        if name not in self.repository:
+            print 'Unknown package {}'.format(name)
+            return False
+        
+        return self.repository[name]
 
     def readRegistry(self):
         registry = json.load(open(self.installdir + os.sep + 'registry.json'))

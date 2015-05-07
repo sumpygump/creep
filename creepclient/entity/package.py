@@ -22,11 +22,23 @@ class Package(Entity):
 
     def download(self, savelocation):
         import urllib2
-        response = urllib2.urlopen(self.url)
+
+        url = self.get_download_location()
+
+        response = urllib2.urlopen(url)
         data = response.read()
+
         f = open(savelocation + os.sep + self.filename, 'w')
         f.write(data)
         f.close()
+
+    def get_download_location(self):
+        if self.url:
+            return self.url
+
+        url = 'http://quantalideas.com/creep/packages/' + self.filename
+
+        return url
 
     def __str__(self):
         return "{0} ({1}) - {2}".format(
