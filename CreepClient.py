@@ -2,6 +2,7 @@
 
 import cmd # Command interpreter logic. Gives us the base class for the client
 import inspect # Functions to inspect live objects
+import json # JSON encoder and decoder
 import os # Miscellaneous operating system interfaces
 import subprocess # Spawn subprocesses, connect in/out pipes, obtain return codes
 import sys # System specific parameters and functions
@@ -20,10 +21,22 @@ class CreepClient(Client, cmd.Cmd):
         Client.__init__(self, **kwargs)
         self.updateVersionWithGitDescribe()
         print "Creep v{}".format(self.VERSION)
+        self.readRegistry()
 
-    def do_hello(self, args):
-        print "Hello"
-        return 1
+    def do_EOF(self, line):
+        return True
+
+    def readRegistry(self):
+        registry = json.load(open('registry.json'))
+        print registry
+
+    def getHomePath(self):
+        """Get the home path for this user from the OS"""
+        home = os.getenv('HOME')
+        if home == None:
+            home = os.getenv('USERPROFILE')
+
+        return home + os.sep + '.creep'
 
     def updateVersionWithGitDescribe(self):
         """Update the version of this client to reflect any local changes in git"""
@@ -37,4 +50,3 @@ class CreepClient(Client, cmd.Cmd):
         except subprocess.CalledProcessError:
             # Oh well, we tried, just use the VERSION as it was
             pass
-

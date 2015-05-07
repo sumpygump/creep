@@ -9,6 +9,16 @@ if __name__ == "__main__":
 
     if len(sys.argv) > 1:
         status = client.onecmd(' '.join(sys.argv[1:]))
+    else:
+        print "  ____                     "
+        print " / ___|_ __ ___  ___ _ __  "
+        print "| |   | '__/ _ \/ _ \ '_ \ "
+        print "| |___| | |  __/  __/ |_) |"
+        print " \____|_|  \___|\___| .__/ "
+        print "                    |_|    "
+
+        # TODO: Show help here?
+        status = 1
 
     sys.exit(status)
 
