@@ -14,6 +14,7 @@ if __name__ == "__main__":
         # Use the client to execute the command from argv
         status = client.onecmd(' '.join(sys.argv[1:]))
     else:
+        client.do_version('')
         print u"█████████████████"
         print u"█░░░░░░░░░░░░░░░█"
         print u"█░░████░░░████░░█"

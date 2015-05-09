@@ -15,7 +15,7 @@ class CreepClient(Client, cmd.Cmd):
     """Creep Mod Package Manager Client"""
 
     # Version of this client
-    VERSION = '0.0.4'
+    VERSION = '0.0.5'
 
     # Absolute path where this client is installed
     installdir = ''
@@ -36,9 +36,11 @@ class CreepClient(Client, cmd.Cmd):
         self.updateVersionWithGitDescribe()
         self.updatePaths()
 
-        print self.colortext("Creep v{}".format(self.VERSION), self.terminal.C_GREEN)
-
         self.readRegistry()
+
+    def do_version(self, args):
+        """Display creep version"""
+        print self.colortext("Creep v{}".format(self.VERSION), self.terminal.C_GREEN)
 
     def do_list(self, args):
         """List packages (mods)
@@ -92,6 +94,16 @@ Example: creep install thecricket/chisel2
         if not package:
             return 1
 
+        print "Installing mod {}".format(package)
+
+        # Install any required packages
+        # Warning: does not handle versions or circular dependencies
+        for dependency in package.require:
+            if dependency == 'minecraft' or dependency == 'forge':
+                continue
+            print 'Installing dependency {}'.format(dependency)
+            self.do_install(dependency)
+
         cachedir = self.appdir + os.sep + 'cache'
         if not os.path.isfile(cachedir + os.sep + package.filename):
             print "Downloading package {0} from {1}".format(package.name, package.get_download_location())
@@ -116,6 +128,18 @@ Example: creep uninstall thecricket/chisel2
         savedir = self.minecraftdir + os.sep + package.installdir 
         os.remove(savedir + os.sep + package.filename)
         print "Removed mod '{0}' from '{1}'".format(package.name, savedir)
+
+    def do_purge(self, args):
+        """Purge all installed packages (mods)
+Usage: creep purge
+"""
+        print "Purging all mods..."
+        installdir = self.minecraftdir + os.sep + 'mods'
+        files = os.listdir(installdir)
+        for f in files:
+            print self.colortext('Removing file {}'.format(f), self.terminal.C_RED)
+            os.remove(installdir + os.sep + f)
+        print "Done."
 
     def fetch_package(self, name):
         if name == '':
