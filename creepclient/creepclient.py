@@ -140,6 +140,11 @@ Example: creep uninstall thecricket/chisel2
         else:
             self.minecraftdir = self.getHomePath('.minecraft')
 
+        if not os.path.isdir(self.minecraftdir):
+            print "Minecraft dir not found ({})".format(self.minecraftdir)
+            print "Is Minecraft installed?"
+            sys.exit(2)
+
         if not os.path.isdir(self.minecraftdir + os.sep + 'mods'):
             os.mkdir(self.minecraftdir + os.sep + 'mods')
 
