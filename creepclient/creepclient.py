@@ -15,7 +15,7 @@ class CreepClient(Client, cmd.Cmd):
     """Creep Mod Package Manager Client"""
 
     # Version of this client
-    VERSION = '0.0.2'
+    VERSION = '0.0.3'
 
     # Absolute path where this client is installed
     installdir = ''
@@ -47,7 +47,7 @@ Usage: creep list
 
         packages = self.repository
         for package in packages:
-            print packages[package]
+            print package
 
     def do_install(self, args):
         """Install a package (mod)
@@ -89,16 +89,18 @@ Example: creep uninstall thecricket/chisel2
         if name == '':
             print 'Missing package name'
             return False
-        if name not in self.repository:
-            print 'Unknown package {}'.format(name)
-            return False
-        
-        return self.repository[name]
+
+        for package in self.repository:
+            if package.name == name:
+                return package
+
+        print 'Unknown package {}'.format(name)
+        return False
 
     def readRegistry(self):
         registry = json.load(open(self.installdir + os.sep + 'registry.json'))
 
-        repository = {}
+        repository = []
         for namekey in registry['packages']:
             for versionkey in registry['packages'][namekey]:
                 data = registry['packages'][namekey][versionkey]
@@ -112,9 +114,11 @@ Example: creep uninstall thecricket/chisel2
                 package.url = data['url'] if 'url' in data else ''
                 package.author = data['author']
                 package.homepage = data['homepage']
-                repository[package.name] = package
+                repository.append(package)
 
+        from operator import attrgetter
         self.repository = repository
+        self.repository.sort(key=attrgetter('name'))
 
     def updatePaths(self):
         self.installdir = os.path.dirname(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))))
