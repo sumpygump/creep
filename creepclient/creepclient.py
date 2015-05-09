@@ -40,17 +40,21 @@ class CreepClient(Client, cmd.Cmd):
 
         self.readRegistry()
 
-    def do_EOF(self, line):
-        return True
-
     def do_list(self, args):
-        """List available packages (mods)"""
+        """List available packages (mods)
+Usage: creep list
+"""
+
         packages = self.repository
         for package in packages:
             print packages[package]
 
     def do_install(self, args):
-        """Install a package (mod)"""
+        """Install a package (mod)
+Usage: creep install <packagename>
+
+Example: creep install thecricket/chisel2 
+"""
 
         package = self.fetch_package(args)
         if not package:
@@ -67,6 +71,12 @@ class CreepClient(Client, cmd.Cmd):
         print "Installed mod '{0}' in '{1}'".format(package.name, savedir + os.sep + package.filename)
 
     def do_uninstall(self, args):
+        """Uninstall a package (mod)
+Usage: creep uninstall <packagename>
+
+Example: creep uninstall thecricket/chisel2 
+"""
+
         package = self.fetch_package(args)
         if not package:
             return 1
