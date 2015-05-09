@@ -32,6 +32,10 @@ foreach ($data as $row) {
     $package->require->minecraft = $row['minecraft version'];
     $package->require->forge = $row['forge version'];
 
+    if ($row['installdir']) {
+        $package->installdir = $row['installdir'];
+    }
+
     if ($row['require']) {
         $require = explode('=', $row['require']);
         $package->require->{$require[0]} = $require[1];

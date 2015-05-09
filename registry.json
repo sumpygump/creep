@@ -306,20 +306,58 @@
                 "url": "http:\/\/www.mediafire.com\/download\/3w45rg9veryu9qn\/Flan's_Mod-1.7.10-4.10.0.jar"
             }
         },
-        "glitchfiend\/biomes-o-plenty": {
-            "2.1.0.1274": {
-                "name": "glitchfiend\/biomes-o-plenty",
-                "version": "2.1.0.1274",
-                "description": "Adds over 75 new biomes, plants and more",
-                "keywords": "biomes, plants",
+        "flan\/modern-warfare": {
+            "4.10.0": {
+                "name": "flan\/modern-warfare",
+                "version": "4.10.0",
+                "description": "A vast selection of modern guns (flans mod pack)",
+                "keywords": "flans, content pack, modern warfare, guns, desert eagle, ak47, p90",
                 "require": {
                     "minecraft": "1.7.10",
-                    "forge": ">=10.13.2.1291"
+                    "forge": ">=10.13.2.1291",
+                    "flan\/flans-mod": "4.10.0"
                 },
-                "filename": "BiomesOPlenty-1.7.10-2.1.0.1067-universal.jar",
-                "author": "Glitchfiend",
-                "homepage": "http:\/\/www.minecraftforum.net\/forums\/mapping-and-modding\/minecraft-mods\/1286162-biomes-o-plenty-over-75-new-biomes-plants-and-more",
-                "url": "http:\/\/files.minecraftforge.net\/maven\/com\/github\/glitchfiend\/biomesoplenty\/BiomesOPlenty\/1.7.10-2.1.0.1274\/BiomesOPlenty-1.7.10-2.1.0.1274-universal.jar"
+                "installdir": "Flan",
+                "filename": "Modern+Warfare-Content+Pack-1.7.10-4.10.0.jar",
+                "author": "Flan",
+                "homepage": "http:\/\/flansmod.com\/content-pack\/4\/Modern_Weapons_Pack",
+                "url": "http:\/\/download731.mediafire.com\/4ixem79t8nrg\/63bxfjhido5ox90\/Modern+Warfare-Content+Pack-1.7.10-4.10.0.jar"
+            }
+        },
+        "flan\/simple-parts": {
+            "4.10.0": {
+                "name": "flan\/simple-parts",
+                "version": "4.10.0",
+                "description": "Adds a ton of plane and vehicle parts for other content packs",
+                "keywords": "flans, simple parts, requirement",
+                "require": {
+                    "minecraft": "1.7.10",
+                    "forge": ">=10.13.2.1291",
+                    "flan\/flans-mod": "4.10.0"
+                },
+                "installdir": "Flan",
+                "filename": "Simple+Parts-Content+Pack-1.7.10-4.10.0.jar",
+                "author": "Flan",
+                "homepage": "http:\/\/flansmod.com\/content-pack\/2\/Simple_Parts_Pack",
+                "url": "http:\/\/download1229.mediafire.com\/upig7ihrl5lg\/jlq78n592mpmu80\/Simple+Parts-Content+Pack-1.7.10-4.10.0.jar"
+            }
+        },
+        "flan\/ww2": {
+            "4.10.0": {
+                "name": "flan\/ww2",
+                "version": "4.10.0",
+                "description": "A pack full of tanks, guns and other WW2 aircraft, vehicles and weapons",
+                "keywords": "flans, content pack, ww2, tanks, guns, helicopter",
+                "require": {
+                    "minecraft": "1.7.10",
+                    "forge": ">=10.13.2.1291",
+                    "flan\/flans-mod": "4.10.0"
+                },
+                "installdir": "Flan",
+                "filename": "WW2-Content+Pack-1.7.10-4.10.0.jar",
+                "author": "Flan",
+                "homepage": "http:\/\/flansmod.com\/content-pack\/7\/World_War_II_Pack",
+                "url": "http:\/\/download1787.mediafire.com\/1b7dza4y71mg\/55eezkq5naooqc8\/WW2-Content+Pack-1.7.10-4.10.0.jar"
             }
         },
         "fyberoptic\/redstone-paste": {
@@ -336,6 +374,37 @@
                 "author": "FyberOptic",
                 "homepage": "http:\/\/www.minecraftforum.net\/forums\/mapping-and-modding\/minecraft-mods\/1291890-redstone-paste-mod",
                 "url": "http:\/\/www.fybertech.net\/minecraft\/RedstonePasteMod-1.7.10-1.6.2.jar"
+            }
+        },
+        "glitchfiend\/biomes-o-plenty": {
+            "2.1.0.1274": {
+                "name": "glitchfiend\/biomes-o-plenty",
+                "version": "2.1.0.1274",
+                "description": "Adds over 75 new biomes, plants and more",
+                "keywords": "biomes, plants",
+                "require": {
+                    "minecraft": "1.7.10",
+                    "forge": ">=10.13.2.1291"
+                },
+                "filename": "BiomesOPlenty-1.7.10-2.1.0.1067-universal.jar",
+                "author": "Glitchfiend",
+                "homepage": "http:\/\/www.minecraftforum.net\/forums\/mapping-and-modding\/minecraft-mods\/1286162-biomes-o-plenty-over-75-new-biomes-plants-and-more",
+                "url": "http:\/\/files.minecraftforge.net\/maven\/com\/github\/glitchfiend\/biomesoplenty\/BiomesOPlenty\/1.7.10-2.1.0.1274\/BiomesOPlenty-1.7.10-2.1.0.1274-universal.jar"
+            }
+        },
+        "greymerk\/rogue like dungeons": {
+            "1.3.6.3": {
+                "name": "greymerk\/rogue like dungeons",
+                "version": "1.3.6.3",
+                "description": "",
+                "keywords": "",
+                "require": {
+                    "minecraft": "1.7.10",
+                    "forge": ">=10.13.2.1291"
+                },
+                "filename": "roguelike-1.7.10-1.3.6.3.jar",
+                "author": "Greymerk",
+                "homepage": "http:\/\/www.minecraftforum.net\/forums\/mapping-and-modding\/minecraft-mods\/1290238-roguelike-dungeons-v1-3-6"
             }
         },
         "jeanglassmaker\/extra-tic": {
@@ -820,21 +889,6 @@
                 "author": "Tonius",
                 "homepage": "http:\/\/minecraft.curseforge.com\/mc-mods\/225251-nei-integration",
                 "url": "http:\/\/minecraft.curseforge.com\/mc-mods\/225251-nei-integration\/files\/latest"
-            }
-        },
-        "greymerk\/rogue like dungeons": {
-            "1.3.6.3": {
-                "name": "greymerk\/rogue like dungeons",
-                "version": "1.3.6.3",
-                "description": "",
-                "keywords": "",
-                "require": {
-                    "minecraft": "1.7.10",
-                    "forge": ">=10.13.2.1291"
-                },
-                "filename": "roguelike-1.7.10-1.3.6.3.jar",
-                "author": "Greymerk",
-                "homepage": "http:\/\/www.minecraftforum.net\/forums\/mapping-and-modding\/minecraft-mods\/1290238-roguelike-dungeons-v1-3-6"
             }
         }
     }

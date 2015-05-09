@@ -153,6 +153,8 @@ Example: creep uninstall thecricket/chisel2
                 package.url = data['url'] if 'url' in data else ''
                 package.author = data['author']
                 package.homepage = data['homepage']
+                if 'installdir' in data:
+                    package.installdir = data['installdir']
                 repository.append(package)
 
         from operator import attrgetter
