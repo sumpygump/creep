@@ -116,7 +116,13 @@ class CreepClient(Client, cmd.Cmd):
         if not os.path.isdir(self.appdir + os.sep + 'cache'):
             os.mkdir(self.appdir + os.sep + 'cache')
 
-        self.minecraftdir = self.getHomePath('.minecraft')
+        if sys.platform[:3] == 'win':
+            self.minecraftdir = self.getHomePath('AppData\\Roaming\\.minecraft')
+        else:
+            self.minecraftdir = self.getHomePath('.minecraft')
+
+        if not os.path.isdir(self.minecraftdir + os.sep + 'mods'):
+            os.mkdir(self.minecraftdir + os.sep + 'mods')
 
     def getHomePath(self, path=''):
         """Get the home path for this user from the OS"""
