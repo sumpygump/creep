@@ -36,7 +36,7 @@ class CreepClient(Client, cmd.Cmd):
         self.updateVersionWithGitDescribe()
         self.updatePaths()
 
-        print "Creep v{}".format(self.VERSION)
+        print self.colortext("Creep v{}".format(self.VERSION), self.terminal.C_GREEN)
 
         self.readRegistry()
 
@@ -47,7 +47,12 @@ Usage: creep list
 
         packages = self.repository
         for package in packages:
-            print package
+            line = '{name} {version} - {description}'.format(
+                name=package.name,
+                version=self.colortext('(' + package.version + ')', self.terminal.C_YELLOW),
+                description=self.colortext(package.description, self.terminal.C_MAGENTA)
+            )
+            print line
 
     def do_install(self, args):
         """Install a package (mod)
@@ -158,3 +163,35 @@ Example: creep uninstall thecricket/chisel2
         except subprocess.CalledProcessError:
             # Oh well, we tried, just use the VERSION as it was
             pass
+
+    def colortext(self, text, forecolor=None, backcolor=None, isbold=None):
+
+        if forecolor is None and backcolor is None and isbold is None:
+            return text
+
+        if isbold:
+            boldstart = self.terminal.bold()
+            boldend = self.terminal.sgr0()
+        else:
+            boldstart = ''
+            boldend = ''
+
+        return '{bold}{start}{text}{end}{unbold}'.format(
+            bold=boldstart,
+            start=self.colorstart(forecolor, backcolor),
+            text=text,
+            end=self.colorend(),
+            unbold=boldend
+        )
+
+    def colorstart(self, forecolor=None, backcolor=None):
+        coloring = ''
+        if forecolor is not None:
+            coloring += self.terminal.setaf(forecolor)
+        if backcolor is not None:
+            coloring += self.terminal.setab(backcolor)
+
+        return coloring
+
+    def colorend(self):
+        return self.terminal.op()
