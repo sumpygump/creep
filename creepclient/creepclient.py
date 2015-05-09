@@ -41,18 +41,45 @@ class CreepClient(Client, cmd.Cmd):
         self.readRegistry()
 
     def do_list(self, args):
-        """List available packages (mods)
-Usage: creep list
-"""
+        """List packages (mods)
+Usage: creep list [installed]
 
+Examples:
+  creep list
+     List available packages in repository
+
+  creep list installed
+     List installed packages
+"""
+        if args == 'installed':
+            installdir = self.minecraftdir + os.sep + 'mods'
+            files = os.listdir(installdir)
+            if not files:
+                print "No mods installed"
+                return False
+
+            print self.colortext("Installed mods (in {}):".format(installdir), self.terminal.C_YELLOW)
+            for name in files:
+                package = self.fetch_package_byfilename(name)
+                if not package:
+                    print self.colortext(name, self.terminal.C_RED)
+                else:
+                    self.print_package(package)
+        else:
+            self.display_packages()
+
+    def display_packages(self):
+        """Display list of packages available"""
         packages = self.repository
         for package in packages:
-            line = '{name} {version} - {description}'.format(
-                name=package.name,
-                version=self.colortext('(' + package.version + ')', self.terminal.C_YELLOW),
-                description=self.colortext(package.description, self.terminal.C_MAGENTA)
-            )
-            print line
+            self.print_package(package)
+
+    def print_package(self, package):
+        print '{name} {version} - {description}'.format(
+            name=package.name,
+            version=self.colortext('(' + package.version + ')', self.terminal.C_YELLOW),
+            description=self.colortext(package.description, self.terminal.C_MAGENTA)
+        )
 
     def do_install(self, args):
         """Install a package (mod)
@@ -102,6 +129,13 @@ Example: creep uninstall thecricket/chisel2
         print 'Unknown package {}'.format(name)
         return False
 
+    def fetch_package_byfilename(self, filename):
+        for package in self.repository:
+            if package.filename == filename:
+                return package
+
+        return False
+
     def readRegistry(self):
         registry = json.load(open(self.installdir + os.sep + 'registry.json'))
 
@@ -137,6 +171,8 @@ Example: creep uninstall thecricket/chisel2
 
         if sys.platform[:3] == 'win':
             self.minecraftdir = self.getHomePath('AppData\\Roaming\\.minecraft')
+        elif sys.platform == 'darwin':
+            self.minecraftdir = self.getHomePath('Library/Application Support/minecraft')
         else:
             self.minecraftdir = self.getHomePath('.minecraft')
 
