@@ -1,0 +1,93 @@
+#!/usr/bin/env php
+<?php
+
+if (!isset($argv[1])) {
+    print "Missing parameter\n";
+    exit(1);
+}
+
+$file = $argv[1];
+
+if (!file_exists($file)) {
+    printf("File '%s' not found or not readable.\n", $file);
+    exit(2);
+}
+
+$data = csv_to_array($file);
+
+$packages = array();
+
+foreach ($data as $row) {
+    $package = new StdClass();
+
+    if (!$row['name']) {
+        continue;
+    }
+
+    $package->name = $row['vendor'] . '/' . $row['name'];
+    $package->version = $row['version'];
+    $package->description = $row['description'];
+    $package->keywords = $row['keywords'];
+    $package->require = new StdClass();
+    $package->require->minecraft = $row['minecraft version'];
+    $package->require->forge = $row['forge version'];
+
+    if ($row['require']) {
+        $require = explode('=', $row['require']);
+        $package->require->{$require[0]} = $require[1];
+    }
+
+    $package->filename = $row['filename'];
+    $package->author = $row['author'];
+    $package->homepage = $row['homepage'];
+    if ($row['url']) {
+        $package->url = $row['url'];
+    }
+
+    $packages[] = $package;
+}
+
+$registry = new StdClass();
+$registry->packages = new StdClass();
+$p = $registry->packages;
+foreach ($packages as $package) {
+    $p->{$package->name} = new StdClass();
+    $p->{$package->name}->{$package->version} = $package;
+}
+
+print(json_encode($registry, JSON_PRETTY_PRINT));
+
+/**
+ * Convert a comma separated file into an associated array.
+ * The first row should contain the array keys.
+ *
+ * Example:
+ *
+ * @param string $filename Path to the CSV file
+ * @param string $delimiter The separator used in the file
+ * @return array
+ * @link http://gist.github.com/385876
+ * @author Jay Williams <http://myd3.com/>
+ * @copyright Copyright (c) 2010, Jay Williams
+ * @license http://www.opensource.org/licenses/mit-license.php MIT License
+ */
+function csv_to_array($filename='', $delimiter=',')
+{
+    if(!file_exists($filename) || !is_readable($filename))
+        return FALSE;
+
+    $header = NULL;
+    $data = array();
+    if (($handle = fopen($filename, 'r')) !== FALSE)
+    {
+        while (($row = fgetcsv($handle, 1000, $delimiter)) !== FALSE)
+        {
+            if(!$header)
+                $header = $row;
+            else
+                $data[] = array_combine($header, $row);
+        }
+        fclose($handle);
+    }
+    return $data;
+}
