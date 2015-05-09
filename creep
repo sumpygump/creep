@@ -14,16 +14,16 @@ if __name__ == "__main__":
         # Use the client to execute the command from argv
         status = client.onecmd(' '.join(sys.argv[1:]))
     else:
-        print "█████████████████"
-        print "█░░░░░░░░░░░░░░░█"
-        print "█░░████░░░████░░█"
-        print "█░░████░░░████░░█"
-        print "█░░░░░░███░░░░░░█"
-        print "█░░░░███████░░░░█"
-        print "█░░░░███████░░░░█"
-        print "█░░░░██░░░██░░░░█"
-        print "█░░░░░░░░░░░░░░░█"
-        print "█████████████████"
+        print u"█████████████████"
+        print u"█░░░░░░░░░░░░░░░█"
+        print u"█░░████░░░████░░█"
+        print u"█░░████░░░████░░█"
+        print u"█░░░░░░███░░░░░░█"
+        print u"█░░░░███████░░░░█"
+        print u"█░░░░███████░░░░█"
+        print u"█░░░░██░░░██░░░░█"
+        print u"█░░░░░░░░░░░░░░░█"
+        print u"█████████████████"
 
         status = client.onecmd('help')
 
