@@ -85,7 +85,6 @@ Usage: creep install <packagename>
 
 Example: creep install thecricket/chisel2 
 """
-
         package = self.repository.fetch_package(args)
         if not package:
             print 'Unknown package {}'.format(args)

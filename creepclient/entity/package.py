@@ -1,3 +1,4 @@
+"""Package entity"""
 
 import creepclient
 import os
@@ -22,6 +23,7 @@ class Package(Entity):
         super(Package, self).__init__(data, **kwargs)
 
     def download(self, savelocation):
+        """Download this package from the specified URL in the package"""
         import urllib2
 
         url = self.get_download_location()
@@ -34,6 +36,7 @@ class Package(Entity):
         f.close()
 
     def get_download_location(self):
+        """Get the download location for this package"""
         if self.url:
             return self.url
 
@@ -43,6 +46,7 @@ class Package(Entity):
         return url
 
     def __str__(self):
+        """Convert this object to a string"""
         return "{0} ({1}) - {2}".format(
             self.name,
             self.version,
