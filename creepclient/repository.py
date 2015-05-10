@@ -8,13 +8,45 @@ from entity.package import Package
 class Repository(object):
     """Repository class"""
 
+    remote_url = 'http://quantalideas.com/mcpackages/packages.json'
+
     packages = []
 
-    def __init__(self, **kwargs):
-        pass
+    def __init__(self, appdir):
+        self.localdir = appdir + os.sep + 'packages.json'
 
-    def readRegistry(self, location):
-        registry = json.load(open(location + os.sep + 'registry.json'))
+    def download_remote_repository(self):
+        import urllib2
+
+        response = urllib2.urlopen(self.remote_url)
+        data = response.read()
+
+        f = open(self.localdir, 'w')
+        f.write(data)
+        f.close()
+
+    def load_repository(self):
+        # Repository file doesn't exist, fetch it from remote url
+        if not os.path.isfile(self.localdir):
+            self.download_remote_repository()
+            return json.load(open(self.localdir))
+        
+        # Check repository file date last modified
+        # If it is older than an hour, redownload
+        import calendar
+        import time
+        filetime = os.stat(self.localdir).st_mtime
+        if filetime + 3600 < calendar.timegm(time.gmtime()):
+            self.download_remote_repository()
+
+        return json.load(open(self.localdir))
+
+    def populate(self, location=''):
+        if not location:
+            registry = self.load_repository()
+        else:
+            # Assuming location is a path to an alternate file
+            registry = json.load(open(location))
 
         for namekey in registry['packages']:
             for versionkey in registry['packages'][namekey]:

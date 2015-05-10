@@ -138,8 +138,8 @@ Usage: creep purge
         print "Done."
 
     def createRepository(self):
-        self.repository = Repository()
-        self.repository.readRegistry(self.installdir)
+        self.repository = Repository(self.appdir)
+        self.repository.populate()
 
     def updatePaths(self):
         self.installdir = os.path.dirname(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))))
