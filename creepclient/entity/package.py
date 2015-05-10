@@ -16,6 +16,7 @@ class Package(Entity):
         self.url = ''
         self.author = ''
         self.homepage = ''
+        self.type = 'mod'
         self.installdir = 'mods'
 
         super(Package, self).__init__(data, **kwargs)
@@ -36,6 +37,7 @@ class Package(Entity):
         if self.url:
             return self.url
 
+        # Backup location in case no url is provided for direct download
         url = 'http://quantalideas.com/creep/packages/' + self.filename
 
         return url

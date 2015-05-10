@@ -26,6 +26,7 @@ foreach ($data as $row) {
 
     $package->name = $row['vendor'] . '/' . $row['name'];
     $package->version = $row['version'];
+    $package->type = $row['type'];
     $package->description = $row['description'];
     $package->keywords = $row['keywords'];
     $package->require = new StdClass();

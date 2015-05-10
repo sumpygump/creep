@@ -2,14 +2,13 @@
 
 import cmd # Command interpreter logic. Gives us the base class for the client
 import inspect # Functions to inspect live objects
-import json # JSON encoder and decoder
 import os # Miscellaneous operating system interfaces
 import shutil # High-level file operations
 import subprocess # Spawn subprocesses, connect in/out pipes, obtain return codes
 import sys # System specific parameters and functions
 
 from qi.console.client import Client
-from entity.package import Package
+from repository import Repository
 
 class CreepClient(Client, cmd.Cmd):
     """Creep Mod Package Manager Client"""
@@ -26,8 +25,6 @@ class CreepClient(Client, cmd.Cmd):
     # Absolute path to the minecraft dir
     minecraftdir = ''
 
-    repository = {}
-
     def __init__(self, **kwargs):
         """Constructor"""
         cmd.Cmd.__init__(self)
@@ -36,7 +33,7 @@ class CreepClient(Client, cmd.Cmd):
         self.updateVersionWithGitDescribe()
         self.updatePaths()
 
-        self.readRegistry()
+        self.createRepository()
 
     def do_version(self, args):
         """Display creep version"""
@@ -62,7 +59,7 @@ Examples:
 
             print self.colortext("Installed mods (in {}):".format(installdir), self.terminal.C_YELLOW)
             for name in files:
-                package = self.fetch_package_byfilename(name)
+                package = self.repository.fetch_package_byfilename(name)
                 if not package:
                     print self.colortext(name, self.terminal.C_RED)
                 else:
@@ -72,8 +69,7 @@ Examples:
 
     def display_packages(self):
         """Display list of packages available"""
-        packages = self.repository
-        for package in packages:
+        for package in self.repository.packages:
             self.print_package(package)
 
     def print_package(self, package):
@@ -90,8 +86,9 @@ Usage: creep install <packagename>
 Example: creep install thecricket/chisel2 
 """
 
-        package = self.fetch_package(args)
+        package = self.repository.fetch_package(args)
         if not package:
+            print 'Unknown package {}'.format(args)
             return 1
 
         print "Installing mod {}".format(package)
@@ -120,9 +117,9 @@ Usage: creep uninstall <packagename>
 
 Example: creep uninstall thecricket/chisel2 
 """
-
-        package = self.fetch_package(args)
+        package = self.repository.fetch_package(args)
         if not package:
+            print 'Unknown package {}'.format(args)
             return 1
 
         savedir = self.minecraftdir + os.sep + package.installdir 
@@ -141,49 +138,9 @@ Usage: creep purge
             os.remove(installdir + os.sep + f)
         print "Done."
 
-    def fetch_package(self, name):
-        if name == '':
-            print 'Missing package name'
-            return False
-
-        for package in self.repository:
-            if package.name == name:
-                return package
-
-        print 'Unknown package {}'.format(name)
-        return False
-
-    def fetch_package_byfilename(self, filename):
-        for package in self.repository:
-            if package.filename == filename:
-                return package
-
-        return False
-
-    def readRegistry(self):
-        registry = json.load(open(self.installdir + os.sep + 'registry.json'))
-
-        repository = []
-        for namekey in registry['packages']:
-            for versionkey in registry['packages'][namekey]:
-                data = registry['packages'][namekey][versionkey]
-                package = Package()
-                package.name = data['name']
-                package.version = data['version']
-                package.description = data['description']
-                package.keywords = data['keywords']
-                package.require = data['require']
-                package.filename = data['filename'] if 'filename' in data else ''
-                package.url = data['url'] if 'url' in data else ''
-                package.author = data['author']
-                package.homepage = data['homepage']
-                if 'installdir' in data:
-                    package.installdir = data['installdir']
-                repository.append(package)
-
-        from operator import attrgetter
-        self.repository = repository
-        self.repository.sort(key=attrgetter('name'))
+    def createRepository(self):
+        self.repository = Repository()
+        self.repository.readRegistry(self.installdir)
 
     def updatePaths(self):
         self.installdir = os.path.dirname(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))))
