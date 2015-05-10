@@ -12,7 +12,8 @@
                 },
                 "filename": "Mekanism-1.7.10-8.1.1.217.jar",
                 "author": "aidancbrady",
-                "homepage": "http:\/\/aidancbrady.com\/mekanism\/"
+                "homepage": "http:\/\/aidancbrady.com\/mekanism\/",
+                "url": "http:\/\/aidancbrady.com\/wp-content\/uploads\/mekanism\/217\/Mekanism-1.7.10-8.1.1.217.jar"
             }
         },
         "aidancbrady\/mekanism-generators": {
@@ -28,7 +29,8 @@
                 },
                 "filename": "MekanismGenerators-1.7.10-8.1.1.217.jar",
                 "author": "aidancbrady",
-                "homepage": "http:\/\/aidancbrady.com\/mekanism\/"
+                "homepage": "http:\/\/aidancbrady.com\/mekanism\/",
+                "url": "http:\/\/aidancbrady.com\/wp-content\/uploads\/mekanism\/217\/MekanismGenerators-1.7.10-8.1.1.217.jar"
             }
         },
         "aidancbrady\/mekanism-tools": {
@@ -44,7 +46,8 @@
                 },
                 "filename": "MekanismTools-1.7.10-8.1.1.217.jar",
                 "author": "aidancbrady",
-                "homepage": "http:\/\/aidancbrady.com\/mekanism\/"
+                "homepage": "http:\/\/aidancbrady.com\/mekanism\/",
+                "url": "http:\/\/aidancbrady.com\/wp-content\/uploads\/mekanism\/217\/MekanismTools-1.7.10-8.1.1.217.jar"
             }
         },
         "appliedenergistics\/applied-energistics-2": {
@@ -79,6 +82,22 @@
                 "url": "http:\/\/www.mod-buildcraft.com\/releases\/BuildCraft\/6.4.14\/buildcraft-6.4.14.jar"
             }
         },
+        "azanor\/thaumcraft": {
+            "4.2.3.5": {
+                "name": "azanor\/thaumcraft",
+                "version": "4.2.3.5",
+                "description": "Adds magical elements to the game",
+                "keywords": "magic, thaumcraft",
+                "require": {
+                    "minecraft": "1.7.10",
+                    "forge": ">=10.13.2.1291"
+                },
+                "filename": "Thaumcraft-1.7.10-4.2.3.5.jar",
+                "author": "Azanor",
+                "homepage": "http:\/\/www.minecraftforum.net\/forums\/mapping-and-modding\/minecraft-mods\/1292130-thaumcraft-4-2-3-5-updated-2015-2-17",
+                "url": "https:\/\/dl.dropboxusercontent.com\/u\/47135879\/Thaumcraft-1.7.10-4.2.3.5.jar"
+            }
+        },
         "bdew\/nei-addons": {
             "1.12.5.17": {
                 "name": "bdew\/nei-addons",
@@ -96,6 +115,22 @@
                 "url": "http:\/\/bdew.net\/download\/neiaddons-mc1710-1.12.7.21.jar"
             }
         },
+        "benimatic\/twilight forest": {
+            "2.3.5": {
+                "name": "benimatic\/twilight forest",
+                "version": "2.3.5",
+                "description": "Adds a new dimension",
+                "keywords": "twilight, diamond, portal, lightning, boss, levels",
+                "require": {
+                    "minecraft": "1.7.10",
+                    "forge": ">=10.13.2.1291"
+                },
+                "filename": "twilightforest-1.7.10-2.3.5.jar",
+                "author": "benimatic",
+                "homepage": "http:\/\/www.minecraftforum.net\/forums\/mapping-and-modding\/minecraft-mods\/1276258-the-twilight-forest-v2-3-5-wrecking-block",
+                "url": "http:\/\/addons.curse.cursecdn.com\/files\/2231\/898\/twilightforest-1.7.10-2.3.5.jar"
+            }
+        },
         "chickenbones\/chicken-chunks": {
             "1.3.4.16": {
                 "name": "chickenbones\/chicken-chunks",
@@ -109,7 +144,8 @@
                 },
                 "filename": "ChickenChunks-1.7.10-1.3.4.16-universal.jar",
                 "author": "chicken_bones",
-                "homepage": "http:\/\/www.minecraftforum.net\/forums\/mapping-and-modding\/minecraft-mods\/1279956-chickenbones-mods"
+                "homepage": "http:\/\/www.minecraftforum.net\/forums\/mapping-and-modding\/minecraft-mods\/1279956-chickenbones-mods",
+                "url": "http:\/\/chickenbones.net\/maven\/codechicken\/ChickenChunks\/1.7.10-1.3.4.16\/ChickenChunks-1.7.10-1.3.4.16-universal.jar"
             }
         },
         "chickenbones\/code-chicken-core": {
@@ -124,7 +160,8 @@
                 },
                 "filename": "CodeChickenCore-1.7.10-1.0.4.29-universal.jar",
                 "author": "chicken_bones",
-                "homepage": "http:\/\/www.minecraftforum.net\/forums\/mapping-and-modding\/minecraft-mods\/1279956-chickenbones-mods"
+                "homepage": "http:\/\/www.minecraftforum.net\/forums\/mapping-and-modding\/minecraft-mods\/1279956-chickenbones-mods",
+                "url": "http:\/\/chickenbones.net\/maven\/codechicken\/CodeChickenCore\/1.7.10-1.0.4.29\/CodeChickenCore-1.7.10-1.0.4.29-universal.jar"
             }
         },
         "chickenbones\/ender-storage": {
@@ -140,7 +177,7 @@
                 "filename": "EnderStorage-1.7.10-1.4.5.27-universal.jar",
                 "author": "chicken_bones",
                 "homepage": "http:\/\/www.curse.com\/mc-mods\/minecraft\/229306-ender-storage",
-                "url": "http:\/\/addons.curse.cursecdn.com\/files\/2233\/208\/EnderStorage-1.7.10-1.4.5.27-universal.jar"
+                "url": "http:\/\/chickenbones.net\/maven\/codechicken\/EnderStorage\/1.7.10-1.4.5.27\/EnderStorage-1.7.10-1.4.5.27-universal.jar"
             }
         },
         "chickenbones\/not-enough-items": {
@@ -156,7 +193,42 @@
                 },
                 "filename": "NotEnoughItems-1.7.10-1.0.4.94-universal.jar",
                 "author": "chicken_bones",
-                "homepage": "http:\/\/www.minecraftforum.net\/forums\/mapping-and-modding\/minecraft-mods\/1279956-chickenbones-mods"
+                "homepage": "http:\/\/www.minecraftforum.net\/forums\/mapping-and-modding\/minecraft-mods\/1279956-chickenbones-mods",
+                "url": "http:\/\/chickenbones.net\/maven\/codechicken\/NotEnoughItems\/1.7.10-1.0.3.74\/NotEnoughItems-1.7.10-1.0.3.74-universal.jar"
+            }
+        },
+        "chickenbones\/translocator": {
+            "1.1.1.14": {
+                "name": "chickenbones\/translocator",
+                "version": "1.1.1.14",
+                "description": "A transport mod, primarily fluid",
+                "keywords": "fluid, gas, liquid, nei",
+                "require": {
+                    "minecraft": "1.7.10",
+                    "forge": ">=10.13.2.1291",
+                    "chickenbones\/code-chicken-core": "1.0.4.29"
+                },
+                "filename": "Translocator-1.7.10-1.1.1.14-universal.jar",
+                "author": "chicken_bones",
+                "homepage": "http:\/\/www.minecraftforum.net\/forums\/mapping-and-modding\/minecraft-mods\/1279956-chickenbones-mods",
+                "url": "http:\/\/chickenbones.net\/maven\/codechicken\/Translocator\/1.7.10-1.1.1.14\/Translocator-1.7.10-1.1.1.14-universal.jar"
+            }
+        },
+        "chickenbones\/wr-cbe": {
+            "1.4.1.9": {
+                "name": "chickenbones\/wr-cbe",
+                "version": "1.4.1.9",
+                "description": "Adds wireless redstone",
+                "keywords": "redstone, nei, project red, wired, wireless",
+                "require": {
+                    "minecraft": "1.7.10",
+                    "forge": ">=10.13.2.1291",
+                    "chickenbones\/code-chicken-core": "1.0.4.29"
+                },
+                "filename": "WR-CBE-1.7.10-1.4.1.9-universal.jar",
+                "author": "chicken_bones",
+                "homepage": "http:\/\/www.minecraftforum.net\/forums\/mapping-and-modding\/minecraft-mods\/1279956-chickenbones-mods",
+                "url": "http:\/\/chickenbones.net\/maven\/codechicken\/WR-CBE\/1.7.10-1.4.1.9\/WR-CBE-1.7.10-1.4.1.9-universal.jar"
             }
         },
         "cofh\/cofh-core": {
@@ -205,7 +277,7 @@
                 "filename": "MineFactoryReloaded-[1.7.10]2.8.0-104.jar",
                 "author": "TeamCoFH",
                 "homepage": "http:\/\/teamcofh.com\/minefactory-reloaded\/",
-                "url": "http:\/\/curse.com\/mc-mods\/minecraft\/minefactory-reloaded\/2233906"
+                "url": "http:\/\/addons.curse.cursecdn.com\/files\/2233\/906\/MineFactoryReloaded-[1.7.10]2.8.0-104.jar"
             }
         },
         "cofh\/nether-ores": {
@@ -222,7 +294,7 @@
                 "filename": "NetherOres-[1.7.10]2.3.0-12.jar",
                 "author": "TeamCoFH",
                 "homepage": "http:\/\/teamcofh.com\/nether-ores\/",
-                "url": "http:\/\/curse.com\/mc-mods\/minecraft\/netherores\/2233919"
+                "url": "http:\/\/addons.curse.cursecdn.com\/files\/2233\/919\/NetherOres-[1.7.10]2.3.0-12.jar"
             }
         },
         "cofh\/redstone-arsenal": {
@@ -238,7 +310,58 @@
                 "filename": "RedstoneArsenal-[1.7.10]1.1.0-80.jar",
                 "author": "TeamCoFH",
                 "homepage": "http:\/\/teamcofh.com\/redstone-arsenal\/",
-                "url": "http:\/\/curse.com\/mc-mods\/minecraft\/redstone-arsenal\/2233785"
+                "url": "http:\/\/addons.curse.cursecdn.com\/files\/2233\/785\/RedstoneArsenal-[1.7.10]1.1.0-80.jar"
+            }
+        },
+        "cofh\/thermal-dynamics": {
+            "1.0.0-122": {
+                "name": "cofh\/thermal-dynamics",
+                "version": "1.0.0-122",
+                "description": "Adds new transportion pipes",
+                "keywords": "transport, pipe, cofh",
+                "require": {
+                    "minecraft": "1.7.10",
+                    "forge": ">=10.13.2.1291",
+                    "cofh\/cofh-core": "3.0.2-262"
+                },
+                "filename": "ThermalDynamics-[1.7.10]1.0.0-122.jar",
+                "author": "TeamCoFH",
+                "homepage": "http:\/\/www.curse.com\/mc-mods\/minecraft\/227443-thermal-dynamics",
+                "url": "http:\/\/addons.curse.cursecdn.com\/files\/2233\/787\/ThermalDynamics-[1.7.10]1.0.0-122.jar"
+            }
+        },
+        "cofh\/thermal-expansion": {
+            "4.0.1-182": {
+                "name": "cofh\/thermal-expansion",
+                "version": "4.0.1-182",
+                "description": "Over all machines, doubling ore, automating",
+                "keywords": "sawmill, windturbine, RF",
+                "require": {
+                    "minecraft": "1.7.10",
+                    "forge": ">=10.13.2.1291",
+                    "cofh\/cofh-core": "3.0.2-262"
+                },
+                "filename": "ThermalExpansion-[1.7.10]4.0.1-182.jar",
+                "author": "TeamCoFH",
+                "homepage": "http:\/\/teamcofh.com\/thermal-expansion\/",
+                "url": "http:\/\/addons.curse.cursecdn.com\/files\/2234\/200\/ThermalExpansion-[1.7.10]4.0.1-182.jar"
+            }
+        },
+        "cofh\/thermal-foundation": {
+            "1.0.0-81": {
+                "name": "cofh\/thermal-foundation",
+                "version": "1.0.0-81",
+                "description": "A core mod that adds different team cofh libraries",
+                "keywords": "core mod, lib",
+                "require": {
+                    "minecraft": "1.7.10",
+                    "forge": ">=10.13.2.1291",
+                    "cofh\/cofh-core": "3.0.2-262"
+                },
+                "filename": "ThermalFoundation-[1.7.10]1.0.0-81.jar",
+                "author": "TeamCoFH",
+                "homepage": "http:\/\/www.curse.com\/mc-mods\/minecraft\/222880-thermal-foundation",
+                "url": "http:\/\/addons.curse.cursecdn.com\/files\/2233\/780\/ThermalFoundation-[1.7.10]1.0.0-81.jar"
             }
         },
         "copygirl\/better-storage": {
@@ -255,6 +378,21 @@
                 "author": "copygirl",
                 "homepage": "https:\/\/github.com\/copygirl\/BetterStorage",
                 "url": "https:\/\/github.com\/copygirl\/BetterStorage\/releases\/download\/v0.13.1.126\/BetterStorage-1.7.10-0.13.1.126.jar"
+            }
+        },
+        "cuchaz\/ships mod": {
+            "1.0.2": {
+                "name": "cuchaz\/ships mod",
+                "version": "1.0.2",
+                "description": "Adds a way to make custom ships and boats. License: GPLv3",
+                "keywords": "ship, boat, meta world",
+                "require": {
+                    "minecraft": "1.7.10",
+                    "forge": ">=10.13.2.1291"
+                },
+                "filename": "shipsMod-v1.7.10-1.0.2.jar",
+                "author": "cuchaz",
+                "homepage": "http:\/\/www.cuchazinteractive.com\/ships\/"
             }
         },
         "dan200\/computercraft": {
@@ -282,12 +420,28 @@
                 "require": {
                     "minecraft": "1.7.10",
                     "forge": ">=10.13.2.1291",
-                    "chickenbones\/not-enough-items": "1.0.4.94,Thaumcraft"
+                    "chickenbones\/not-enough-items": "1.0.4.94,azanor\/thaumcraft"
                 },
                 "filename": "gud_thaumicnei-1.2.3.jar",
                 "author": "DjGiannuzz",
                 "homepage": "http:\/\/www.curse.com\/mc-mods\/minecraft\/225095-thaumcraft-nei-plugin",
                 "url": "http:\/\/addons.curse.cursecdn.com\/files\/2226\/58\/thaumcraftneiplugin-1.7.10-1.7.jar"
+            }
+        },
+        "Emoniph\/witchery": {
+            "0.24.1": {
+                "name": "Emoniph\/witchery",
+                "version": "0.24.1",
+                "description": "Adds different types of brewery and magic",
+                "keywords": "witch, wizard, magic",
+                "require": {
+                    "minecraft": "1.7.10",
+                    "forge": ">=10.13.2.1291"
+                },
+                "filename": "witchery-1.7.10-0.24.1.jar",
+                "author": "Emoniph",
+                "homepage": "http:\/\/www.curse.com\/mc-mods\/minecraft\/witchery",
+                "url": "http:\/\/addons.curse.cursecdn.com\/files\/2234\/410\/witchery-1.7.10-0.24.1.jar"
             }
         },
         "flan\/flans-mod": {
@@ -351,7 +505,7 @@
                 "require": {
                     "minecraft": "1.7.10",
                     "forge": ">=10.13.2.1291",
-                    "flan\/flans-mod": "4.10.0"
+                    "flan\/flans-mod": "4.10.0,flan\/simple-parts"
                 },
                 "installdir": "Flan",
                 "filename": "WW2-Content+Pack-1.7.10-4.10.0.jar",
@@ -392,19 +546,20 @@
                 "url": "http:\/\/files.minecraftforge.net\/maven\/com\/github\/glitchfiend\/biomesoplenty\/BiomesOPlenty\/1.7.10-2.1.0.1274\/BiomesOPlenty-1.7.10-2.1.0.1274-universal.jar"
             }
         },
-        "greymerk\/rogue like dungeons": {
+        "greymerk\/roguelike": {
             "1.3.6.3": {
-                "name": "greymerk\/rogue like dungeons",
+                "name": "greymerk\/roguelike",
                 "version": "1.3.6.3",
-                "description": "",
-                "keywords": "",
+                "description": "Adds randomly generated dungeon complexes",
+                "keywords": "dungeons",
                 "require": {
                     "minecraft": "1.7.10",
                     "forge": ">=10.13.2.1291"
                 },
                 "filename": "roguelike-1.7.10-1.3.6.3.jar",
                 "author": "Greymerk",
-                "homepage": "http:\/\/www.minecraftforum.net\/forums\/mapping-and-modding\/minecraft-mods\/1290238-roguelike-dungeons-v1-3-6"
+                "homepage": "http:\/\/www.minecraftforum.net\/forums\/mapping-and-modding\/minecraft-mods\/1290238-roguelike-dungeons-v1-3-6",
+                "url": "https:\/\/github.com\/Greymerk\/minecraft-roguelike\/releases\/download\/1.7.10-1.3.6.3\/roguelike-1.7.10-1.3.6.3.jar"
             }
         },
         "jeanglassmaker\/extra-tic": {
@@ -468,7 +623,25 @@
                 },
                 "filename": "LunatriusCore-1.7.10-1.1.2.21-universal.jar",
                 "author": "Lunatrius",
-                "homepage": "https:\/\/mods.io\/mods\/1025-lunatriuscore"
+                "homepage": "https:\/\/mods.io\/mods\/1025-lunatriuscore",
+                "url": "http:\/\/mc.lunatri.us\/files\/com.github.lunatrius\/LunatriusCore\/1.7.10-1.1.2.21\/LunatriusCore-1.7.10-1.1.2.21-universal.jar"
+            }
+        },
+        "lunatrius\/schematica": {
+            "1.7.5.117": {
+                "name": "lunatrius\/schematica",
+                "version": "1.7.5.117",
+                "description": "Adds a way to see MCEdit files in the game",
+                "keywords": "MCEdit, schematica",
+                "require": {
+                    "minecraft": "1.7.10",
+                    "forge": ">=10.13.2.1291",
+                    "lunatrius\/lunatrius-core": "1.1.2.21"
+                },
+                "filename": "Schematica-1.7.10-1.7.5.117-universal.jar",
+                "author": "Lunatrius",
+                "homepage": "http:\/\/www.minecraftforum.net\/forums\/mapping-and-modding\/minecraft-mods\/1285818-schematica",
+                "url": "http:\/\/mc.lunatri.us\/files\/com.github.lunatrius\/Schematica\/1.8-1.7.5.117\/Schematica-1.8-1.7.5.117-universal.jar"
             }
         },
         "mapwriter\/mapwriter": {
@@ -487,6 +660,23 @@
                 "url": "http:\/\/www.fansana.de\/download\/MapWriter-1.7.10.jar"
             }
         },
+        "mDiyo\/tmechworks": {
+            "0.2.10": {
+                "name": "mDiyo\/tmechworks",
+                "version": "0.2.10",
+                "description": "A addon to tinker's contruct",
+                "keywords": "addon, drawbridge",
+                "require": {
+                    "minecraft": "1.7.10",
+                    "forge": ">=10.13.2.1291",
+                    "slimeknights\/tconstruct": "1.8.3b"
+                },
+                "filename": "TMechworks-1.7.10-0.2.10.jar",
+                "author": "mDiyo",
+                "homepage": "http:\/\/www.curse.com\/mc-mods\/minecraft\/tinkers-mechworks",
+                "url": "http:\/\/addons.curse.cursecdn.com\/files\/2229\/984\/TMechworks-1.7.10-0.2.14.100.jar"
+            }
+        },
         "mine-and-blade\/battlegear2": {
             "1.0.7.0": {
                 "name": "mine-and-blade\/battlegear2",
@@ -503,9 +693,9 @@
                 "url": "http:\/\/addons-origin.cursecdn.com\/files\/2225\/110\/1.7.10-MB_Battlegear2-Bullseye-1.0.7.0.jar"
             }
         },
-        "mineshopper\/carpentersblocks": {
+        "mineshopper\/carpenters-blocks": {
             "3.3.6": {
-                "name": "mineshopper\/carpentersblocks",
+                "name": "mineshopper\/carpenters-blocks",
                 "version": "3.3.6",
                 "description": "Alter shapes of various blocks",
                 "keywords": "carpenter, hammer, chisel",
@@ -515,7 +705,8 @@
                 },
                 "filename": "Carpenter's Blocks v3.3.5 - MC 1.7.10.jar",
                 "author": "Mineshopper",
-                "homepage": "http:\/\/www.carpentersblocks.com\/"
+                "homepage": "http:\/\/www.carpentersblocks.com\/",
+                "url": "https:\/\/dl.dropboxusercontent.com\/s\/wv9c5c05oga30og\/Carpenter%27s%20Blocks%20v3.3.6%20-%20MC%201.7.10.jar"
             }
         },
         "openmods\/openblocks": {
@@ -599,6 +790,23 @@
                 "url": "http:\/\/minecraft.curseforge.com\/mc-mods\/221857-pams-harvestcraft\/files\/2233399\/download"
             }
         },
+        "pixlepix\/thaumic-tinkerer": {
+            "2.5-163": {
+                "name": "pixlepix\/thaumic-tinkerer",
+                "version": "2.5-163",
+                "description": "Adds a compatibility between Tinker's Construct and Thaumcraft",
+                "keywords": "thaumic, thinker, TConstruct, Thaumcraft",
+                "require": {
+                    "minecraft": "1.7.10",
+                    "forge": ">=10.13.2.1291",
+                    "slimeknights\/tconstruct": "1.8.3b,azanor\/thaumcraft"
+                },
+                "filename": "ThaumicTinkerer-2.5-1.7.10-163.jar",
+                "author": "pixlepix",
+                "homepage": "http:\/\/www.minecraftforum.net\/forums\/mapping-and-modding\/minecraft-mods\/1289299-thaumic-tinkerer-thaumcraft-addon-evolve-knowledge",
+                "url": "http:\/\/minecraft.curseforge.com\/mc-mods\/75598-thaumic-tinkerer\/files\/latest"
+            }
+        },
         "player\/fast-craft": {
             "1.21": {
                 "name": "player\/fast-craft",
@@ -615,105 +823,122 @@
                 "url": "http:\/\/files.player.to\/fastcraft-1.21.jar"
             }
         },
+        "profMobius\/waila": {
+            "1.5.10": {
+                "name": "profMobius\/waila",
+                "version": "1.5.10",
+                "description": "Adds a HUD telling you what you're looking at",
+                "keywords": "what am I looking at, HUD",
+                "require": {
+                    "minecraft": "1.7.10",
+                    "forge": ">=10.13.2.1291",
+                    "chickenbones\/not-enough-items": "1.0.4.94"
+                },
+                "filename": "Waila-1.5.10_1.7.10.jar",
+                "author": "profMobius",
+                "homepage": "http:\/\/www.minecraftforum.net\/forums\/mapping-and-modding\/minecraft-mods\/1289765-waila-1-5-7-for-1-7-10-1-6-0-for-1-8-1",
+                "url": "http:\/\/addons.curse.cursecdn.com\/files\/2230\/518\/Waila-1.5.10_1.7.10.jar"
+            }
+        },
         "projectred\/projectred-base": {
-            "4.5.15.75": {
+            "4.6.0.79": {
                 "name": "projectred\/projectred-base",
-                "version": "4.5.15.75",
+                "version": "4.6.0.79",
                 "description": "Base mod for other Project Red mods",
                 "keywords": "Project Red, core mod",
                 "require": {
                     "minecraft": "1.7.10",
                     "forge": ">=10.13.2.1291"
                 },
-                "filename": "ProjectRed-1.7.10-4.5.15.75-Base.jar",
-                "author": "Project Red",
-                "homepage": "http:\/\/projectredwiki.com\/wiki\/Version_archive",
-                "url": "http:\/\/curse.com\/mc-mods\/minecraft\/229002-mrtjpcore\/2236593"
+                "filename": "ProjectRed-1.7.10-4.6.0.79-Base.jar",
+                "author": "MrTJP",
+                "homepage": "http:\/\/projectredwiki.com\/wiki\/Main_Page",
+                "url": "http:\/\/addons.curse.cursecdn.com\/files\/2236\/607\/ProjectRed-1.7.10-4.6.0.79-Base.jar"
             }
         },
         "projectred\/projectred-compat": {
-            "4.5.15.75": {
+            "4.6.0.79": {
                 "name": "projectred\/projectred-compat",
-                "version": "4.5.15.75",
+                "version": "4.6.0.79",
                 "description": "Adds Compat redstone blocks",
                 "keywords": "Project Red, compact",
                 "require": {
                     "minecraft": "1.7.10",
                     "forge": ">=10.13.2.1291",
-                    "projectred\/projectred-base": "4.5.15.75"
+                    "projectred\/projectred-base": "4.6.0.79"
                 },
-                "filename": "ProjectRed-1.7.10-4.5.15.75-Compat.jar",
-                "author": "Project Red",
-                "homepage": "http:\/\/projectredwiki.com\/wiki\/Version_archive",
-                "url": "http:\/\/curse.com\/mc-mods\/minecraft\/228702-project-red-base\/2236607"
+                "filename": "ProjectRed-1.7.10-4.6.0.79-Compat.jar",
+                "author": "MrTJP",
+                "homepage": "http:\/\/projectredwiki.com\/wiki\/Compatability",
+                "url": "http:\/\/addons.curse.cursecdn.com\/files\/2236\/614\/ProjectRed-1.7.10-4.6.0.79-Compat.jar"
             }
         },
         "projectred\/projectred-integration": {
-            "4.5.15.75": {
+            "4.6.0.79": {
                 "name": "projectred\/projectred-integration",
-                "version": "4.5.15.75",
+                "version": "4.6.0.79",
                 "description": "Adds different integration",
                 "keywords": "project red, compatibility",
                 "require": {
                     "minecraft": "1.7.10",
                     "forge": ">=10.13.2.1291",
-                    "projectred\/projectred-base": "4.5.15.75"
+                    "projectred\/projectred-base": "4.6.0.79"
                 },
-                "filename": "ProjectRed-1.7.10-4.5.15.75-Integration.jar",
-                "author": "Project Red",
-                "homepage": "http:\/\/projectredwiki.com\/wiki\/Version_archive",
-                "url": "http:\/\/www.curse.com\/mc-mods\/minecraft\/229045-project-red-integration#t1:other-downloads"
+                "filename": "ProjectRed-1.7.10-4.6.0.79-Integration.jar",
+                "author": "MrTJP",
+                "homepage": "http:\/\/projectredwiki.com\/wiki\/Integration",
+                "url": "http:\/\/addons.curse.cursecdn.com\/files\/2236\/610\/ProjectRed-1.7.10-4.6.0.79-Integration.jar"
             }
         },
         "projectred\/projectred-lighting": {
-            "4.5.15.75": {
+            "4.6.0.79": {
                 "name": "projectred\/projectred-lighting",
-                "version": "4.5.15.75",
+                "version": "4.6.0.79",
                 "description": "Adds new lighting options",
                 "keywords": "project red, glow, light, torch",
                 "require": {
                     "minecraft": "1.7.10",
                     "forge": ">=10.13.2.1291",
-                    "projectred\/projectred-base": "4.5.15.75"
+                    "projectred\/projectred-base": "4.6.0.79"
                 },
                 "filename": "ProjectRed-1.7.10-4.5.15.75-Lighting.jar",
-                "author": "Project Red",
-                "homepage": "http:\/\/projectredwiki.com\/wiki\/Version_archive",
-                "url": "http:\/\/curse.com\/mc-mods\/minecraft\/229046-project-red-lighting\/2236611"
+                "author": "MrTJP",
+                "homepage": "http:\/\/projectredwiki.com\/wiki\/Illumination",
+                "url": "http:\/\/addons.curse.cursecdn.com\/files\/2236\/611\/ProjectRed-1.7.10-4.6.0.79-Lighting.jar"
             }
         },
         "projectred\/projectred-mechanical": {
-            "4.5.15.75": {
+            "4.6.0.79": {
                 "name": "projectred\/projectred-mechanical",
-                "version": "4.5.15.75",
+                "version": "4.6.0.79",
                 "description": "Adds mod compatibility",
                 "keywords": "project red, machine",
                 "require": {
                     "minecraft": "1.7.10",
                     "forge": ">=10.13.2.1291",
-                    "projectred\/projectred-base": "4.5.15.75"
+                    "projectred\/projectred-base": "4.6.0.79"
                 },
                 "filename": "ProjectRed-1.7.10-4.5.15.75-Mechanical_beta.jar",
-                "author": "Project Red",
+                "author": "MrTJP",
                 "homepage": "http:\/\/projectredwiki.com\/wiki\/Version_archive",
-                "url": "http:\/\/curse.com\/mc-mods\/minecraft\/229048-project-red-mechanical\/2236612"
+                "url": "http:\/\/addons.curse.cursecdn.com\/files\/2236\/612\/ProjectRed-1.7.10-4.6.0.79-Mechanical_beta.jar"
             }
         },
         "projectred\/projectred-world": {
-            "4.5.15.75": {
+            "4.6.0.79": {
                 "name": "projectred\/projectred-world",
-                "version": "4.5.15.75",
+                "version": "4.6.0.79",
                 "description": "Adds new in world spawning blocks and structures",
                 "keywords": "project red, building",
                 "require": {
                     "minecraft": "1.7.10",
                     "forge": ">=10.13.2.1291",
-                    "projectred\/projectred-base": "4.5.15.75"
+                    "projectred\/projectred-base": "4.6.0.79"
                 },
                 "filename": "ProjectRed-1.7.10-4.5.15.75-World.jar",
-                "author": "Project Red",
+                "author": "MrTJP",
                 "homepage": "http:\/\/projectredwiki.com\/wiki\/Version_archive",
-                "url": "http:\/\/curse.com\/mc-mods\/minecraft\/229049-project-red-world\/2236613"
+                "url": "http:\/\/addons.curse.cursecdn.com\/files\/2236\/613\/ProjectRed-1.7.10-4.6.0.79-World.jar"
             }
         },
         "richdigits\/damage-indicators": {
@@ -728,7 +953,8 @@
                 },
                 "filename": "[1.7.10]DamageIndicatorsMod-3.2.3.jar",
                 "author": "rich1051414",
-                "homepage": "http:\/\/www.minecraftforum.net\/forums\/mapping-and-modding\/minecraft-mods\/1286538-hit-splat-damage-indicators-v3-3-2-rpg-ui-and"
+                "homepage": "http:\/\/www.minecraftforum.net\/forums\/mapping-and-modding\/minecraft-mods\/1286538-hit-splat-damage-indicators-v3-3-2-rpg-ui-and",
+                "url": "https:\/\/dl.dropboxusercontent.com\/u\/74770478\/%5B1.7.10%5DDamageIndicatorsMod-3.2.3.jar"
             }
         },
         "rwtema\/denseores": {
@@ -776,7 +1002,8 @@
                 },
                 "filename": "Artifice-1.7.10-1.1.4-310.jar",
                 "author": "Shukaro",
-                "homepage": "http:\/\/www.minecraftforum.net\/forums\/mapping-and-modding\/minecraft-mods\/1290031-1-6-x-1-7-x-artifice-the-correct-term-is-mauve"
+                "homepage": "http:\/\/www.minecraftforum.net\/forums\/mapping-and-modding\/minecraft-mods\/1290031-1-6-x-1-7-x-artifice-the-correct-term-is-mauve",
+                "url": "http:\/\/addons.curse.cursecdn.com\/files\/2222\/812\/Artifice-1.7.10-1.1.4-310.jar"
             }
         },
         "sirusking\/industrial-craft-2": {
@@ -789,9 +1016,9 @@
                     "minecraft": "1.7.10",
                     "forge": ">=10.13.2.1291"
                 },
-                "filename": "Industrial-Craft-2-Mod-Experimental-1.7.10.jar",
+                "filename": "industrialcraft-2-2.2.719-experimental.jar",
                 "author": "SirusKing",
-                "homepage": "",
+                "homepage": "http:\/\/wiki.industrial-craft.net\/index.php?title=Main_Page",
                 "url": "http:\/\/jenkins.ic2.player.to\/job\/IC2_experimental\/lastSuccessfulBuild\/artifact\/build\/libs\/industrialcraft-2-2.2.719-experimental.jar"
             }
         },
@@ -839,7 +1066,7 @@
                 },
                 "filename": "JourneyMap5.0.1_Unlimited_MC1.7.10.jar",
                 "author": "techbrew",
-                "homepage": "http:\/\/journeymap.techbrew.net\/download\/",
+                "homepage": "http:\/\/journeymap.techbrew.net\/",
                 "url": "http:\/\/minecraft.curseforge.com\/mc-mods\/32274-journeymap-32274\/files\/2221283\/download"
             }
         },
@@ -871,7 +1098,8 @@
                 },
                 "filename": "[1.7.10]Better_Furnaces_V4.3.jar",
                 "author": "TheFrogMC",
-                "homepage": "http:\/\/www.minecraftforum.net\/forums\/mapping-and-modding\/minecraft-mods\/1279439-better-furnaces-mod"
+                "homepage": "http:\/\/www.minecraftforum.net\/forums\/mapping-and-modding\/minecraft-mods\/1279439-better-furnaces-mod",
+                "url": "http:\/\/download766.mediafire.com\/b675qee01c6g\/qf9czouuuo2bfwr\/%5B1.7.10%5DBetter_Furnaces_V4.3.jar"
             }
         },
         "tonius\/nei-integration": {
@@ -889,6 +1117,23 @@
                 "author": "Tonius",
                 "homepage": "http:\/\/minecraft.curseforge.com\/mc-mods\/225251-nei-integration",
                 "url": "http:\/\/minecraft.curseforge.com\/mc-mods\/225251-nei-integration\/files\/latest"
+            }
+        },
+        "tonius111\/simply-jetpacks": {
+            "1.4.1": {
+                "name": "tonius111\/simply-jetpacks",
+                "version": "1.4.1",
+                "description": "Adds jetpacks, simply",
+                "keywords": "jetpack, RF, cofh, addons",
+                "require": {
+                    "minecraft": "1.7.10",
+                    "forge": ">=10.13.2.1291",
+                    "slimeknights\/tconstruct": "1.8.3b"
+                },
+                "filename": "Simply-Jetpacks-Mod-1.7.10.jar",
+                "author": "tonius111",
+                "homepage": "http:\/\/www.curse.com\/mc-mods\/minecraft\/simply-jetpacks",
+                "url": "http:\/\/addons.curse.cursecdn.com\/files\/2228\/46\/SimplyJetpacks-MC1.7.10-1.4.1.jar"
             }
         }
     }
