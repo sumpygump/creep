@@ -1,5 +1,12 @@
 #!/usr/bin/env php
 <?php
+/**
+ * This script is used to convert a CSV file of the minecraft packages into a 
+ * json format that is used by creep
+ *
+ * Run it from the command line like so:
+ * $ tools/csv2registry mods.csv > registry.json
+ */
 
 if (!isset($argv[1])) {
     print "Missing parameter\n";
@@ -53,6 +60,8 @@ foreach ($data as $row) {
 }
 
 $registry = new StdClass();
+$registry->repository_version = '';
+$registry->date = date('Y-m-d H:i:s');
 $registry->packages = new StdClass();
 $p = $registry->packages;
 foreach ($packages as $package) {
@@ -60,6 +69,14 @@ foreach ($packages as $package) {
     $p->{$package->name}->{$package->version} = $package;
 }
 
+// Make the entire registry into a string so we can give it a unique hash
+$registryString = json_encode($registry);
+$repositoryHash = md5($registryString);
+
+// Save the hash to the object
+$registry->repository_version = $repositoryHash;
+
+// Output the registry
 print(json_encode($registry, JSON_PRETTY_PRINT));
 
 /**
