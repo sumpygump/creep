@@ -45,8 +45,16 @@ foreach ($data as $row) {
     }
 
     if ($row['require']) {
-        $require = explode('=', $row['require']);
-        $package->require->{$require[0]} = $require[1];
+        if (strpos($row['require'], ',')) {
+            $requires = explode(',', $row['require']);
+            foreach ($requires as $require) {
+                $require = explode('=', $require);
+                $package->require->{$require[0]} = $require[1];
+            }
+        } else {
+            $require = explode('=', $row['require']);
+            $package->require->{$require[0]} = $require[1];
+        }
     }
 
     $package->filename = $row['filename'];
