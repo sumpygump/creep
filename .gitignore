@@ -1,1 +1,7 @@
 */*.pyc
+/creepclient/entity/__init__.pyc
+/creepclient/entity/package.pyc
+/qi/console/client.pyc
+/qi/console/__init__.pyc
+/qi/console/terminal.pyc
+/qi/console/terminfo.pyc
