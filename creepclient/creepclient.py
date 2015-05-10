@@ -199,6 +199,8 @@ Usage: creep purge
             self.minecraftdir = self.getHomePath('AppData\\Roaming\\.minecraft')
         elif sys.platform == 'darwin':
             self.minecraftdir = self.getHomePath('Library/Application Support/minecraft')
+        elif sys.platform == 'cygwin':
+            self.minecraftdir = os.getenv('APPDATA') + os.sep + '.minecraft'
         else:
             self.minecraftdir = self.getHomePath('.minecraft')
 
