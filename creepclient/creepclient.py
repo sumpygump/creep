@@ -129,13 +129,23 @@ Example: creep uninstall thecricket/chisel2
         """Purge all installed packages (mods)
 Usage: creep purge
 """
-        print "Purging all mods..."
+        print "Purging all installed mods in {}...".format(self.minecraftdir + os.sep + 'mods')
         installdir = self.minecraftdir + os.sep + 'mods'
-        files = os.listdir(installdir)
-        for f in files:
-            print self.colortext('Removing file {}'.format(f), self.terminal.C_RED)
-            os.remove(installdir + os.sep + f)
+        self.delete_path(installdir)
         print "Done."
+
+    def delete_path(self, rootdir):
+        files = os.listdir(rootdir)
+        for f in files:
+            if os.path.isdir(rootdir + os.sep + f):
+                self.delete_path(rootdir + os.sep + f)
+            else:
+                print self.colortext('Removing file {}'.format(f), self.terminal.C_RED)
+                try:
+                    os.remove(rootdir + os.sep + f)
+                except OSError:
+                    print 'opa'
+                    continue
 
     def createRepository(self):
         self.repository = Repository(self.appdir)
