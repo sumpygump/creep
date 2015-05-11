@@ -28,7 +28,8 @@ class Package(Entity):
 
         url = self.get_download_location()
 
-        response = urllib2.urlopen(url)
+        request = urllib2.Request(url, headers={'User-Agent' : "Creep Browser 0.1"}) 
+        response = urllib2.urlopen(request)
         data = response.read()
 
         f = open(savelocation + os.sep + self.filename, 'w')
