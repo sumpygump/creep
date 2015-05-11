@@ -3,6 +3,7 @@
 import json # JSON encoder and decoder
 import os # Miscellaneous operating system interfaces
 
+from operator import attrgetter
 from entity.package import Package
 
 class Repository(object):
@@ -66,8 +67,6 @@ class Repository(object):
                     package.installdir = data['installdir']
                 self.packages.append(package)
 
-        from operator import attrgetter
-
         self.packages.sort(key=attrgetter('name'))
 
     def fetch_package(self, name):
@@ -86,3 +85,19 @@ class Repository(object):
                 return package
 
         return False
+
+    def search(self, term):
+        results = []
+        for package in self.packages:
+            if term in package.name.split('/'):
+                results.append(package)
+                continue
+            if term in package.description.split():
+                results.append(package)
+                continue
+            if term in package.keywords:
+                results.append(package)
+                continue
+
+        results.sort(key=attrgetter('name'))
+        return results

@@ -79,6 +79,19 @@ Examples:
             description=self.colortext(package.description, self.terminal.C_MAGENTA)
         )
 
+    def do_search(self, args):
+        """Search for a package (mod)
+Usage: creep search <packagename>
+
+Example: creep search nei
+"""
+        if args == '':
+            return False
+
+        packages = self.repository.search(args)
+        for package in packages:
+            self.print_package(package)
+
     def do_install(self, args):
         """Install a package (mod)
 Usage: creep install <packagename>
@@ -87,28 +100,28 @@ Example: creep install thecricket/chisel2
 """
         package = self.repository.fetch_package(args)
         if not package:
-            print 'Unknown package {}'.format(args)
+            print self.colortext("Unknown package '{}'".format(args), self.terminal.C_RED)
             return 1
 
-        print "Installing mod {}".format(package)
+        print self.colortext("Installing package {}".format(package), self.terminal.C_BLUE)
 
         # Install any required packages
         # Warning: does not handle versions or circular dependencies
         for dependency in package.require:
             if dependency == 'minecraft' or dependency == 'forge':
                 continue
-            print 'Installing dependency {}'.format(dependency)
+            print self.colortext("Installing dependency '{}'".format(dependency), self.terminal.C_CYAN)
             self.do_install(dependency)
 
         cachedir = self.appdir + os.sep + 'cache'
         if not os.path.isfile(cachedir + os.sep + package.filename):
-            print "Downloading package {0} from {1}".format(package.name, package.get_download_location())
+            print self.colortext("Downloading mod '{0}' from {1}".format(package.name, package.get_download_location()), self.terminal.C_YELLOW)
             package.download(cachedir)
 
         savedir = self.minecraftdir + os.sep + package.installdir 
         shutil.copyfile(cachedir + os.sep + package.filename, savedir + os.sep + package.filename)
 
-        print "Installed mod '{0}' in '{1}'".format(package.name, savedir + os.sep + package.filename)
+        print self.colortext("Installed mod '{0}' in '{1}'".format(package.name, savedir + os.sep + package.filename), self.terminal.C_GREEN)
 
     def do_uninstall(self, args):
         """Uninstall a package (mod)

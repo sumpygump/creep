@@ -51,18 +51,20 @@ This section will provide some guidance on how to install *creep*
 
 ## Usage
 
- - `creep list` - will list all the known packages (mods) in the repository
- - `creep install <package>` - will install the package to your `~/.minecraft/mods` folder
- - `creep uninstall <package>` - will remove the package from your mods folder
+ - `creep list` - list all the known packages (mods) in the repository
+ - `creep search <search-term>` - display packages containing given search term
+ - `creep install <package>` - install the package to your minecraft mods folder
+ - `creep uninstall <package>` - remove the package from your minecraft mods folder
+ - `creep purge` - remove all installed packages
 
-The mod files are stored in a cache directory in `~/.creep/cache`
+### Cache
+
+For your information, package files are saved in a cache directory in `~/.creep/cache`
 
 ## Future Plans
 
- - Support dependencies
- - Have a registry where people can define their mods
+ - Have a registry (website) where people can define their mods
  - Support multiple versions of a single mod
- - Ability search the registry for mods by typing `creep search furnace`
  - Ability to make collections of mods by requiring other mods or packages
 
 Example `mod.json`. A definition file in json format of a package (mod)
