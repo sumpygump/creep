@@ -10,6 +10,8 @@ class Repository(object):
     """Repository class"""
 
     remote_url = 'http://quantalideas.com/mcpackages/packages.json'
+    version_hash = ''
+    version_date = ''
 
     packages = []
 
@@ -42,12 +44,18 @@ class Repository(object):
 
         return json.load(open(self.localdir))
 
+    def clear_cache(self):
+        os.remove(self.localdir)
+
     def populate(self, location=''):
         if not location:
             registry = self.load_repository()
         else:
             # Assuming location is a path to an alternate file
             registry = json.load(open(location))
+
+        self.version_hash = registry['repository_version']
+        self.version_date = registry['date']
 
         for namekey in registry['packages']:
             for versionkey in registry['packages'][namekey]:
@@ -68,6 +76,9 @@ class Repository(object):
                 self.packages.append(package)
 
         self.packages.sort(key=attrgetter('name'))
+
+    def count_packages(self):
+        return len(self.packages)
 
     def fetch_package(self, name):
         if name == '':

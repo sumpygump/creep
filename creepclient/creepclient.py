@@ -147,6 +147,14 @@ Usage: creep purge
         self.delete_path(installdir)
         print "Done."
 
+    def do_update(self, args):
+        """Force an update of the package repository"""
+
+        self.repository.clear_cache()
+        self.repository.populate()
+        print self.colortext("Repository updated to version {} ({}).".format(self.repository.version_hash, self.repository.version_date), self.terminal.C_GREEN)
+        print "Count: {} packages.".format(self.repository.count_packages())
+
     def delete_path(self, rootdir):
         files = os.listdir(rootdir)
         for f in files:
