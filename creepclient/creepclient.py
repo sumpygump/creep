@@ -147,8 +147,8 @@ Usage: creep purge
         self.delete_path(installdir)
         print "Done."
 
-    def do_update(self, args):
-        """Force an update of the package repository"""
+    def do_refresh(self, args):
+        """Force an refresh of the package repository"""
 
         self.repository.clear_cache()
         self.repository.populate()

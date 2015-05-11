@@ -56,6 +56,7 @@ This section will provide some guidance on how to install *creep*
  - `creep install <package>` - install the package to your minecraft mods folder
  - `creep uninstall <package>` - remove the package from your minecraft mods folder
  - `creep purge` - remove all installed packages
+ - `creep refresh` - Force refresh of internal package repository
 
 ### Cache
 
