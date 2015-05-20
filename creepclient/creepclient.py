@@ -73,11 +73,16 @@ Examples:
             self.print_package(package)
 
     def print_package(self, package):
-        print '{name} {version} - {description}'.format(
+        message = '{name} {version} - {description}'.format(
             name=package.name,
             version=self.colortext('(' + package.version + ')', self.terminal.C_YELLOW),
             description=self.colortext(package.description, self.terminal.C_MAGENTA)
         )
+
+        if package.type == 'collection':
+            message = message + self.colortext(' [collection]', self.terminal.C_CYAN)
+
+        print message
 
     def do_search(self, args):
         """Search for a package (mod)
@@ -113,15 +118,19 @@ Example: creep install thecricket/chisel2
             print self.colortext("Installing dependency '{}'".format(dependency), self.terminal.C_CYAN)
             self.do_install(dependency)
 
-        cachedir = self.appdir + os.sep + 'cache'
-        if not os.path.isfile(cachedir + os.sep + package.filename):
-            print self.colortext("Downloading mod '{0}' from {1}".format(package.name, package.get_download_location()), self.terminal.C_YELLOW)
-            package.download(cachedir)
+        if package.type == 'collection':
+            # Collection only has dependencies
+            print self.colortext("Installed collection '{0}'".format(package.name), self.terminal.C_GREEN)
+        else:
+            cachedir = self.appdir + os.sep + 'cache'
+            if not os.path.isfile(cachedir + os.sep + package.filename):
+                print self.colortext("Downloading mod '{0}' from {1}".format(package.name, package.get_download_location()), self.terminal.C_YELLOW)
+                package.download(cachedir)
 
-        savedir = self.minecraftdir + os.sep + package.installdir 
-        shutil.copyfile(cachedir + os.sep + package.filename, savedir + os.sep + package.filename)
+            savedir = self.minecraftdir + os.sep + package.installdir 
+            shutil.copyfile(cachedir + os.sep + package.filename, savedir + os.sep + package.filename)
 
-        print self.colortext("Installed mod '{0}' in '{1}'".format(package.name, savedir + os.sep + package.filename), self.terminal.C_GREEN)
+            print self.colortext("Installed mod '{0}' in '{1}'".format(package.name, savedir + os.sep + package.filename), self.terminal.C_GREEN)
 
     def do_uninstall(self, args):
         """Uninstall a package (mod)
@@ -160,6 +169,7 @@ Usage: creep purge
         for f in files:
             if os.path.isdir(rootdir + os.sep + f):
                 self.delete_path(rootdir + os.sep + f)
+                os.rmdir(rootdir + os.sep + f)
             else:
                 print self.colortext('Removing file {}'.format(f), self.terminal.C_RED)
                 try:
@@ -171,6 +181,10 @@ Usage: creep purge
     def createRepository(self):
         self.repository = Repository(self.appdir)
         self.repository.populate()
+
+        # Check if local packages repository exists and load it too
+        if os.path.isfile(self.appdir + os.sep + 'local-packages.json'):
+            self.repository.populate(self.appdir + os.sep + 'local-packages.json')
 
     def updatePaths(self):
         self.installdir = os.path.dirname(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))))

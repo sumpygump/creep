@@ -54,8 +54,10 @@ class Repository(object):
             # Assuming location is a path to an alternate file
             registry = json.load(open(location))
 
-        self.version_hash = registry['repository_version']
-        self.version_date = registry['date']
+        if 'repository_version' in registry:
+            self.version_hash = registry['repository_version']
+        if 'date' in registry:
+            self.version_date = registry['date']
 
         for namekey in registry['packages']:
             for versionkey in registry['packages'][namekey]:
@@ -69,7 +71,7 @@ class Repository(object):
                 package.filename = data['filename'] if 'filename' in data else ''
                 package.url = data['url'] if 'url' in data else ''
                 package.author = data['author']
-                package.homepage = data['homepage']
+                package.homepage = data['homepage'] if 'homepage' in data else ''
                 package.type = data['type']
                 if 'installdir' in data:
                     package.installdir = data['installdir']
