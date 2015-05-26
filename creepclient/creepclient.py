@@ -8,6 +8,7 @@ import subprocess # Spawn subprocesses, connect in/out pipes, obtain return code
 import sys # System specific parameters and functions
 
 from qi.console.client import Client
+from operator import attrgetter
 from repository import Repository
 
 class CreepClient(Client, cmd.Cmd):
@@ -57,13 +58,22 @@ Examples:
                 print "No mods installed"
                 return False
 
-            print self.colortext("Installed mods (in {}):".format(installdir), self.terminal.C_YELLOW)
+            packages = []
+            unknownfiles = []
             for name in files:
                 package = self.repository.fetch_package_byfilename(name)
                 if not package:
-                    print self.colortext(name, self.terminal.C_RED)
+                    unknownfiles.append(name)
                 else:
-                    self.print_package(package)
+                    packages.append(package)
+
+            packages.sort(key=attrgetter('name'))
+
+            print self.colortext("Installed mods (in {}):".format(installdir), self.terminal.C_YELLOW)
+            for package in packages:
+                self.print_package(package)
+            for name in unknownfiles:
+                print self.colortext(name, self.terminal.C_RED)
         else:
             self.display_packages()
 
