@@ -3,6 +3,7 @@
 import cmd # Command interpreter logic. Gives us the base class for the client
 import inspect # Functions to inspect live objects
 import os # Miscellaneous operating system interfaces
+import shlex # Lexical analysis of user input.
 import shutil # High-level file operations
 import subprocess # Spawn subprocesses, connect in/out pipes, obtain return codes
 import sys # System specific parameters and functions
@@ -110,9 +111,32 @@ Example: creep search nei
     def do_install(self, args):
         """Install a package (mod)
 Usage: creep install <packagename>
+       creep install -l <listfilename>
 
 Example: creep install thecricket/chisel2 
+         creep install -l mymodlist.txt
+
+<listfilename> is a list of packages to install consisting of one package name per line
 """
+        args = shlex.split(args)
+
+        if len(args) == 0:
+            print self.colortext("Missing argument", self.terminal.C_RED)
+            return 1
+
+        if args[0] == '-l':
+            # Handle install from listfile
+            try:
+                listfile = args[1]
+            except IndexError:
+                print self.colortext("Missing argument for listfile", self.terminal.C_RED)
+                return 1
+            self.install_from_listfile(listfile)
+        else:
+            # Handle install individual package
+            self.install_package(args[0])
+
+    def install_package(self, args):
         package = self.repository.fetch_package(args)
         if not package:
             print self.colortext("Unknown package '{}'".format(args), self.terminal.C_RED)
@@ -141,6 +165,19 @@ Example: creep install thecricket/chisel2
             shutil.copyfile(cachedir + os.sep + package.filename, savedir + os.sep + package.filename)
 
             print self.colortext("Installed mod '{0}' in '{1}'".format(package.name, savedir + os.sep + package.filename), self.terminal.C_GREEN)
+
+    def install_from_listfile(self, listfile):
+        print "Reading packages from file '{}'...".format(listfile)
+
+        if not os.path.isfile(listfile):
+            print self.colortext("File '{}' not found".format(listfile), self.terminal.C_RED) 
+            return 1
+
+        # Read file and attempt to parse each line as a package name
+        with open(listfile) as fp:
+            for line in fp:
+                args = line.split()
+                self.install_package(args[0])
 
     def do_uninstall(self, args):
         """Uninstall a package (mod)

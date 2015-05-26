@@ -52,8 +52,11 @@ This section will provide some guidance on how to install *creep*
 ## Usage
 
  - `creep list` - list all the known packages (mods) in the repository
+ - `creep list installed` - lists all the current installed mods
  - `creep search <search-term>` - display packages containing given search term
  - `creep install <package>` - install the package to your minecraft mods folder
+ - `creep install -l <listfile>` - install a list of packages from file where
+   one package is listed per line in given file
  - `creep uninstall <package>` - remove the package from your minecraft mods folder
  - `creep purge` - remove all installed packages
  - `creep refresh` - Force refresh of internal package repository
