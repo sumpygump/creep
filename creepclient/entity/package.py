@@ -32,7 +32,7 @@ class Package(Entity):
         response = urllib2.urlopen(request)
         data = response.read()
 
-        f = open(savelocation + os.sep + self.filename, 'w')
+        f = open(savelocation + os.sep + self.get_local_filename(), 'w')
         f.write(data)
         f.close()
 
@@ -45,6 +45,17 @@ class Package(Entity):
         url = 'http://quantalideas.com/creep/packages/' + self.filename
 
         return url
+
+    def get_local_filename(self):
+        """Get the local canonical filename made up of entity attributes"""
+        if self.installdir != 'mods':
+            # For non-regular mods use the orig filename
+            return self.filename
+
+        filename, extension = os.path.splitext(self.filename)
+
+        # vendor_name_version.extension
+        return self.name.replace('/', '_') + '_' + self.version.replace(' ', '-') + extension
 
     def __str__(self):
         """Convert this object to a string"""

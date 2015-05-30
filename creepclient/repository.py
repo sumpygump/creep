@@ -94,7 +94,7 @@ class Repository(object):
 
     def fetch_package_byfilename(self, filename):
         for package in self.packages:
-            if package.filename == filename:
+            if package.filename == filename or package.get_local_filename() == filename:
                 return package
 
         return False

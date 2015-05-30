@@ -156,15 +156,23 @@ Example: creep install thecricket/chisel2
             # Collection only has dependencies
             print self.colortext("Installed collection '{0}'".format(package.name), self.terminal.C_GREEN)
         else:
-            cachedir = self.appdir + os.sep + 'cache'
-            if not os.path.isfile(cachedir + os.sep + package.filename):
+            cachedir = self.appdir + os.sep + 'cache' + os.sep + package.installdir
+
+            if not os.path.isdir(cachedir):
+                os.mkdir(cachedir)
+
+            if not os.path.isfile(cachedir + os.sep + package.get_local_filename()):
                 print self.colortext("Downloading mod '{0}' from {1}".format(package.name, package.get_download_location()), self.terminal.C_YELLOW)
                 package.download(cachedir)
 
+            # Most of the time this is the '~/.minecraft/mods' dir, but some mods have an alternate location for artifacts
             savedir = self.minecraftdir + os.sep + package.installdir 
-            shutil.copyfile(cachedir + os.sep + package.filename, savedir + os.sep + package.filename)
+            if not os.path.isdir(savedir):
+                os.mkdir(savedir)
+                
+            shutil.copyfile(cachedir + os.sep + package.get_local_filename(), savedir + os.sep + package.get_local_filename())
 
-            print self.colortext("Installed mod '{0}' in '{1}'".format(package.name, savedir + os.sep + package.filename), self.terminal.C_GREEN)
+            print self.colortext("Installed mod '{0}' in '{1}'".format(package.name, savedir + os.sep + package.get_local_filename()), self.terminal.C_GREEN)
 
     def install_from_listfile(self, listfile):
         print "Reading packages from file '{}'...".format(listfile)
@@ -191,7 +199,7 @@ Example: creep uninstall thecricket/chisel2
             return 1
 
         savedir = self.minecraftdir + os.sep + package.installdir 
-        os.remove(savedir + os.sep + package.filename)
+        os.remove(savedir + os.sep + package.get_local_filename())
         print "Removed mod '{0}' from '{1}'".format(package.name, savedir)
 
     def do_purge(self, args):
