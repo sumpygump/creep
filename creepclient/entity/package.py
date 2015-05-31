@@ -19,6 +19,7 @@ class Package(Entity):
         self.homepage = ''
         self.type = 'mod'
         self.installdir = 'mods'
+        self.installstrategy = ''
 
         super(Package, self).__init__(data, **kwargs)
 

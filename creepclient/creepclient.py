@@ -1,12 +1,15 @@
 """CLI client for creep"""
 
 import cmd # Command interpreter logic. Gives us the base class for the client
+import distutils.dir_util # Directory utilities
 import inspect # Functions to inspect live objects
 import os # Miscellaneous operating system interfaces
 import shlex # Lexical analysis of user input.
 import shutil # High-level file operations
 import subprocess # Spawn subprocesses, connect in/out pipes, obtain return codes
 import sys # System specific parameters and functions
+import tempfile # Temporary file utilities
+import zipfile # Zip file utilities
 
 from qi.console.client import Client
 from operator import attrgetter
@@ -170,6 +173,9 @@ Example: creep install thecricket/chisel2
             if not os.path.isdir(savedir):
                 os.mkdir(savedir)
                 
+            if package.installstrategy:
+                self.install_with_strategy(package.installstrategy, package, cachedir, savedir)
+
             shutil.copyfile(cachedir + os.sep + package.get_local_filename(), savedir + os.sep + package.get_local_filename())
 
             print self.colortext("Installed mod '{0}' in '{1}'".format(package.name, savedir + os.sep + package.get_local_filename()), self.terminal.C_GREEN)
@@ -186,6 +192,35 @@ Example: creep install thecricket/chisel2
             for line in fp:
                 args = line.split()
                 self.install_package(args[0])
+
+    def install_with_strategy(self, installstrategy, package, cachedir, savedir):
+
+        print "Installing with strategy: " + installstrategy
+
+        if ';' in installstrategy:
+            strategies = installstrategy.split(';')
+        else:
+            strategies = [installstrategy]
+
+        # set up a temppath where we will work
+        tmppath = tempfile.gettempdir() + os.sep + package.name.replace('/', '_')
+        if os.path.exists(tmppath):
+            shutil.rmtree(tmppath)
+        os.mkdir(tmppath)
+
+        for strategy in strategies:
+            args = shlex.split(strategy)
+            if args[0] == 'unzip':
+                print 'Unzipping archive: ' + cachedir + os.sep + package.get_local_filename()
+                self.unzip(cachedir + os.sep + package.get_local_filename(), tmppath)
+            elif args[0] == 'move':
+                print 'Moving files: ' + args[1]
+                path = args[1]
+                if path[-2:] == '/*':
+                    path = path.replace('/*', '')
+                    distutils.dir_util.copy_tree(tmppath + os.sep + path, savedir)
+                else:
+                    shutil.copytree(tmppath + os.sep + path, savedir)
 
     def do_uninstall(self, args):
         """Uninstall a package (mod)
@@ -320,3 +355,7 @@ Usage: creep purge
 
     def colorend(self):
         return self.terminal.op()
+
+    def unzip(self, source_filename, dest_dir):
+        with zipfile.ZipFile(source_filename) as zf:
+            zf.extractall(dest_dir)

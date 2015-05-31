@@ -75,6 +75,8 @@ class Repository(object):
                 package.type = data['type']
                 if 'installdir' in data:
                     package.installdir = data['installdir']
+                if 'installstrategy' in data:
+                    package.installstrategy = data['installstrategy']
                 self.packages.append(package)
 
         self.packages.sort(key=attrgetter('name'))

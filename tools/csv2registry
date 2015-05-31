@@ -44,6 +44,10 @@ foreach ($data as $row) {
         $package->installdir = $row['installdir'];
     }
 
+    if ($row['installstrategy']) {
+        $package->installstrategy = $row['installstrategy'];
+    }
+
     if ($row['require']) {
         if (strpos($row['require'], ',')) {
             $requires = explode(',', $row['require']);
