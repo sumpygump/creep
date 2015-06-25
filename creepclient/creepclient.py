@@ -83,7 +83,7 @@ Examples:
 
     def display_packages(self):
         """Display list of packages available"""
-        for package in self.repository.packages:
+        for package in self.repository.unique_packages:
             self.print_package(package)
 
     def print_package(self, package):
@@ -166,7 +166,11 @@ Example: creep install thecricket/chisel2
 
             if not os.path.isfile(cachedir + os.sep + package.get_local_filename()):
                 print self.colortext("Downloading mod '{0}' from {1}".format(package.name, package.get_download_location()), self.terminal.C_YELLOW)
-                package.download(cachedir)
+                downloadResult = package.download(cachedir)
+            
+            if not downloadResult:
+                print "Download failed."
+                return False
 
             # Most of the time this is the '~/.minecraft/mods' dir, but some mods have an alternate location for artifacts
             savedir = self.minecraftdir + os.sep + package.installdir 

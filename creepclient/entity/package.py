@@ -30,12 +30,19 @@ class Package(Entity):
         url = self.get_download_location()
 
         request = urllib2.Request(url, headers={'User-Agent' : "Creep Browser 0.1"}) 
-        response = urllib2.urlopen(request)
+        try:
+            response = urllib2.urlopen(request)
+        except urllib2.URLError:
+            print "No internet connection. Cannot download file '" + self.get_download_location() + "'"
+            return False
+
         data = response.read()
 
         f = open(savelocation + os.sep + self.get_local_filename(), 'w')
         f.write(data)
         f.close()
+
+        return True
 
     def get_download_location(self):
         """Get the download location for this package"""
