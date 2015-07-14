@@ -168,9 +168,9 @@ Example: creep install thecricket/chisel2
                 print self.colortext("Downloading mod '{0}' from {1}".format(package.name, package.get_download_location()), self.terminal.C_YELLOW)
                 downloadResult = package.download(cachedir)
             
-            if not downloadResult:
-                print "Download failed."
-                return False
+                if not downloadResult:
+                    print "Download failed."
+                    return False
 
             # Most of the time this is the '~/.minecraft/mods' dir, but some mods have an alternate location for artifacts
             savedir = self.minecraftdir + os.sep + package.installdir 
