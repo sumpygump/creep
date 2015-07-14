@@ -125,7 +125,7 @@ class Repository(object):
         return cmp(self.normalize_version(version1), self.normalize_version(version2))
 
     def normalize_version(self, v):
-        return [int(x) for x in re.sub(r'(\.0+)*$','', v).split(".")]
+        return [x for x in re.sub(r'(\.0+)*$','', v).split(".")]
 
     def count_packages(self):
         return len(self.packages)
