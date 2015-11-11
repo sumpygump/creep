@@ -98,6 +98,18 @@ Examples:
 
         print message
 
+    def print_package_details(self, package):
+        print package.name
+        print '--------'
+        print "Version: " + package.version
+        print "Description: " + package.description
+        print "Package Type: " + package.type
+        print "Keywords: " + package.keywords
+        print "Homepage: " + package.homepage
+        print "Dependencies: "
+        for key,value in package.require.iteritems():
+            print " - " + key + ": " + value
+
     def do_search(self, args):
         """Search for a package (mod)
 Usage: creep search <packagename>
@@ -110,6 +122,23 @@ Example: creep search nei
         packages = self.repository.search(args)
         for package in packages:
             self.print_package(package)
+
+    def do_info(self, args):
+        """Display details for a specific package (mod)
+Usage: creep info <packagename>
+
+Example: creep info slimeknights/tconstruct
+"""
+        if len(args) == 0:
+            print self.colortext("Missing argument", self.terminal.C_RED)
+            return 1
+
+        package = self.repository.fetch_package(args)
+        if not package:
+            print self.colortext("Unknown package '{}'".format(args), self.terminal.C_RED)
+            return 1
+
+        self.print_package_details(package)
 
     def do_install(self, args):
         """Install a package (mod)
