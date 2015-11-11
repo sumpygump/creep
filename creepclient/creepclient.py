@@ -19,7 +19,7 @@ class CreepClient(Client, cmd.Cmd):
     """Creep Mod Package Manager Client"""
 
     # Version of this client
-    VERSION = '0.1.1'
+    VERSION = '0.1.2'
 
     # Absolute path where this client is installed
     installdir = ''
