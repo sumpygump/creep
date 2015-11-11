@@ -20,6 +20,9 @@ class Repository(object):
     # List of all packages, but only the latest version
     unique_packages = []
 
+    # Dict of all unique packages, by second name
+    simple_name_packages = {}
+
     def __init__(self, appdir):
         self.localdir = appdir + os.sep + 'packages.json'
 
@@ -95,6 +98,7 @@ class Repository(object):
 
         self.packages.sort(key=attrgetter('name'))
         self.reduce_to_unique_packages()
+        self.create_simple_name_index()
 
     def reduce_to_unique_packages(self):
         """Make a listing of packages with only the latest version for each one"""
@@ -121,6 +125,19 @@ class Repository(object):
 
         self.unique_packages.sort(key=attrgetter('name'))
 
+    def create_simple_name_index(self):
+        """Make a listing of packages by the second name for simplified access
+        if no conflicts (different vendors)"""
+        package_dict = {}
+
+        for package in self.unique_packages:
+            simple_name = package.get_simple_name()
+            if not simple_name in package_dict:
+                package_dict[simple_name] = []
+            package_dict[simple_name].append(package)
+
+        self.simple_name_packages = package_dict
+
     def compare_versions(self, version1, version2):
         return cmp(self.normalize_version(version1), self.normalize_version(version2))
 
@@ -139,6 +156,12 @@ class Repository(object):
         for package in self.unique_packages:
             if package.name == name:
                 return package
+
+        if name in self.simple_name_packages:
+            if len(self.simple_name_packages[name]) > 1:
+                print "Multiple packages exist with name '{name}'".format(name=name)
+                return False
+            return self.simple_name_packages[name][0]
 
         return False
 

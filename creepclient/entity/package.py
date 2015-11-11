@@ -65,6 +65,10 @@ class Package(Entity):
         # vendor_name_version.extension
         return self.name.replace('/', '_') + '_' + self.version.replace(' ', '-') + extension
 
+    def get_simple_name(self):
+        """Get the second name (without the vendor) for a package"""
+        return self.name.split('/')[1]
+
     def __str__(self):
         """Convert this object to a string"""
         return "{0} ({1}) - {2}".format(
