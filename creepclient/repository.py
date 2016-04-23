@@ -11,8 +11,15 @@ class Repository(object):
     """Repository class"""
 
     remote_url = 'http://quantalideas.com/mcpackages/packages.json'
+    #remote_url = 'http://creep-packages.dev/packages.json'
     version_hash = ''
     version_date = ''
+
+    # Remove fetching timeout value (in seconds)
+    timeout = 5
+
+    # Local registry cache lifetime in seconds
+    cache_life = 3600
 
     # Has every package, including every version of each
     packages = []
@@ -29,8 +36,9 @@ class Repository(object):
     def download_remote_repository(self):
         import urllib2
 
+        print "Refreshing registry file from " + self.remote_url
         try:
-            response = urllib2.urlopen(self.remote_url)
+            response = urllib2.urlopen(self.remote_url, None, self.timeout)
         except urllib2.URLError:
             return False
 
@@ -50,13 +58,13 @@ class Repository(object):
             return json.load(open(self.localdir))
         
         # Check repository file date last modified
-        # If it is older than an hour, redownload
+        # If it is older than specified time, redownload
         import calendar
         import time
         filetime = os.stat(self.localdir).st_mtime
-        if filetime + 3600 < calendar.timegm(time.gmtime()):
+        if filetime + self.cache_life < calendar.timegm(time.gmtime()):
             if not self.download_remote_repository():
-                print "No internet connection. Using current version of repository. Date: {}".format(filetime)
+                print "No internet connection. Using current version of repository. Date: {}".format(time.ctime(filetime))
 
         return json.load(open(self.localdir))
 
