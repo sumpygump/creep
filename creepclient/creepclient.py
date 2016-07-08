@@ -3,6 +3,7 @@
 import cmd # Command interpreter logic. Gives us the base class for the client
 import distutils.dir_util # Directory utilities
 import inspect # Functions to inspect live objects
+import json # JSON encoder and decoder
 import os # Miscellaneous operating system interfaces
 import shlex # Lexical analysis of user input.
 import shutil # High-level file operations
@@ -30,6 +31,9 @@ class CreepClient(Client, cmd.Cmd):
     # Absolute path to the minecraft dir
     minecraftdir = ''
 
+    # Version of minecraft to target for mods
+    minecraft_target = '1.7.10'
+
     def __init__(self, **kwargs):
         """Constructor"""
         cmd.Cmd.__init__(self)
@@ -37,12 +41,44 @@ class CreepClient(Client, cmd.Cmd):
 
         self.updateVersionWithGitDescribe()
         self.updatePaths()
+        self.load_target()
 
         self.createRepository()
 
     def do_version(self, args):
         """Display creep version"""
         print self.colortext("Creep v{}".format(self.VERSION), self.terminal.C_GREEN)
+        self.display_target()
+
+    def do_target(self, args):
+        """Set the targeted minecraft version
+Usage: creep target <minecraft_version>
+
+Examples:
+  creep target 1.7.10
+     Set the version of minecraft for mods
+"""
+        if len(args) > 0:
+            # TODO: Validate against ~/.minecraft/launcher_profiles.json for valid versions to use
+            self.minecraft_target = args
+
+        self.display_target()
+        self.save_options()
+
+    def display_target(self):
+        print self.colortext("Targetting minecraft version {}".format(self.minecraft_target), self.terminal.C_GREEN)
+
+    def load_target(self):
+        # TODO: More robust user options file handling. It should be its own object to load options
+        options_path = self.appdir + os.sep + 'options.json'
+        if os.path.isfile(options_path):
+            options = json.load(open(options_path))
+            self.minecraft_target = options['minecraft_target']
+    
+    def save_options(self):
+        options_path = self.appdir + os.sep + 'options.json'
+        with open(options_path, 'w') as outfile:
+            json.dump({'minecraft_target': self.minecraft_target}, outfile)
 
     def do_list(self, args):
         """List packages (mods)
@@ -56,7 +92,7 @@ Examples:
      List installed packages
 """
         if args == 'installed':
-            installdir = self.minecraftdir + os.sep + 'mods'
+            installdir = self.minecraftdir + os.sep + 'mods' + os.sep + self.minecraft_target
             files = os.listdir(installdir)
             if not files:
                 print "No mods installed"
@@ -203,7 +239,13 @@ Example: creep install thecricket/chisel2
 
             # Most of the time this is the '~/.minecraft/mods' dir, but some mods have an alternate location for artifacts
             savedir = self.minecraftdir + os.sep + package.installdir 
+
+            # Tack on the minecraft version to the savedir
+            if package.installdir == 'mods':
+                savedir = savedir + os.sep + package.require['minecraft']
+
             if not os.path.isdir(savedir):
+                print self.colortext("Creating directory '{0}'".format(savedir))
                 os.mkdir(savedir)
                 
             if package.installstrategy:
