@@ -308,7 +308,11 @@ Example: creep uninstall thecricket/chisel2
             print 'Unknown package {}'.format(args)
             return 1
 
-        savedir = self.minecraftdir + os.sep + package.installdir 
+        if package.installdir == 'mods':
+            savedir = self.minecraftdir + os.sep + package.installdir + os.sep + self.minecraft_target
+        else:
+            savedir = self.minecraftdir + os.sep + package.installdir
+
         os.remove(savedir + os.sep + package.get_local_filename())
         print "Removed mod '{0}' from '{1}'".format(package.name, savedir)
 
@@ -316,8 +320,8 @@ Example: creep uninstall thecricket/chisel2
         """Purge all installed packages (mods)
 Usage: creep purge
 """
-        print "Purging all installed mods in {}...".format(self.minecraftdir + os.sep + 'mods')
-        installdir = self.minecraftdir + os.sep + 'mods'
+        installdir = self.minecraftdir + os.sep + 'mods' + os.sep + self.minecraft_target
+        print "Purging all installed mods in {}...".format(installdir)
         self.delete_path(installdir)
         print "Done."
 
