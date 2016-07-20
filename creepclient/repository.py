@@ -6,12 +6,13 @@ import re # Regular expressions
 
 from operator import attrgetter
 from entity.package import Package
+from pprint import pprint
 
 class Repository(object):
     """Repository class"""
 
     remote_url = 'http://quantalideas.com/mcpackages/packages.json'
-    #remote_url = 'http://creep-packages.dev/packages.json'
+    #remote_url = 'http://creep-packages.lvh.me/packages.json'
     version_hash = ''
     version_date = ''
 
@@ -30,8 +31,14 @@ class Repository(object):
     # Dict of all unique packages, by second name
     simple_name_packages = {}
 
+    # Currently targeted version of minecraft
+    minecraft_target = "1.7.10"
+
     def __init__(self, appdir):
         self.localdir = appdir + os.sep + 'packages.json'
+
+    def set_minecraft_target(self, target):
+        self.minecraft_target = target
 
     def download_remote_repository(self):
         import urllib2
@@ -72,7 +79,7 @@ class Repository(object):
         if os.path.isfile(self.localdir):
             os.remove(self.localdir)
 
-    def populate(self, location=''):
+    def populate(self, location='', should_post_process=True):
         if not location:
             registry = self.load_repository()
         else:
@@ -104,6 +111,11 @@ class Repository(object):
                     package.installstrategy = data['installstrategy']
                 self.packages.append(package)
 
+        if should_post_process:
+            self.post_populate()
+
+    def post_populate(self):
+        """Processing of packages to occur after population"""
         self.packages.sort(key=attrgetter('name'))
         self.reduce_to_unique_packages()
         self.create_simple_name_index()
@@ -123,13 +135,24 @@ class Repository(object):
         for name in package_dict:
             packages = package_dict[name]
             if len(packages) == 1:
-                self.unique_packages.append(packages[0])
+                package = packages[0]
+                if package.get_minecraft_version() == self.minecraft_target:
+                    self.unique_packages.append(package)
             else:
-                latest = packages[0]
+                # Filter to only target the targeted minecraft version
+                targeted_version_packages = []
                 for package in packages:
-                    if self.compare_versions(package.version, latest.version) > 0:
-                        latest = package
-                self.unique_packages.append(latest)
+                    if package.get_minecraft_version() == self.minecraft_target:
+                        targeted_version_packages.append(package)
+
+                # Find the latest version
+                if len(targeted_version_packages) > 0:
+                    latest = targeted_version_packages[0]
+                    for package in targeted_version_packages:
+                        if self.compare_versions(package.version, latest.version) > 0:
+                            latest = package
+
+                    self.unique_packages.append(latest)
 
         self.unique_packages.sort(key=attrgetter('name'))
 

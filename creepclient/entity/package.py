@@ -65,6 +65,10 @@ class Package(Entity):
         # vendor_name_version.extension
         return self.name.replace('/', '_') + '_' + self.version.replace(' ', '-') + extension
 
+    def get_minecraft_version(self):
+        """Get the minecraft version for this package"""
+        return self.require['minecraft']
+
     def get_simple_name(self):
         """Get the second name (without the vendor) for a package"""
         return self.name.split('/')[1]

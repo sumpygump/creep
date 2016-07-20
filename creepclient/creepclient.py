@@ -63,6 +63,7 @@ Examples:
             self.minecraft_target = args
 
         self.display_target()
+        self.repository.set_minecraft_target(self.minecraft_target)
         self.save_options()
 
     def display_target(self):
@@ -123,10 +124,11 @@ Examples:
             self.print_package(package)
 
     def print_package(self, package):
-        message = '{name} {version} - {description}'.format(
+        message = '{name} {version} - {description} [{mcversion}]'.format(
             name=package.name,
             version=self.colortext('(' + package.version + ')', self.terminal.C_YELLOW),
-            description=self.colortext(package.description, self.terminal.C_MAGENTA)
+            description=self.colortext(package.description, self.terminal.C_MAGENTA),
+            mcversion=self.colortext(package.get_minecraft_version(), self.terminal.C_YELLOW)
         )
 
         if package.type == 'collection':
@@ -349,7 +351,8 @@ Usage: creep purge
 
     def createRepository(self):
         self.repository = Repository(self.appdir)
-        self.repository.populate()
+        self.repository.set_minecraft_target(self.minecraft_target)
+        self.repository.populate('', False)
 
         # Check if local packages repository exists and load it too
         if os.path.isfile(self.appdir + os.sep + 'local-packages.json'):
