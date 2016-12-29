@@ -352,11 +352,13 @@ Usage: creep purge
     def createRepository(self):
         self.repository = Repository(self.appdir)
         self.repository.set_minecraft_target(self.minecraft_target)
-        self.repository.populate('', False)
 
         # Check if local packages repository exists and load it too
         if os.path.isfile(self.appdir + os.sep + 'local-packages.json'):
+            self.repository.populate('', False)
             self.repository.populate(self.appdir + os.sep + 'local-packages.json')
+        else:
+            self.repository.populate('', True)
 
     def updatePaths(self):
         self.installdir = os.path.dirname(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))))
