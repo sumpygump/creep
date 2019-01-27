@@ -75,7 +75,7 @@ Examples:
         if os.path.isfile(options_path):
             options = json.load(open(options_path))
             self.minecraft_target = options['minecraft_target']
-    
+
     def save_options(self):
         options_path = self.appdir + os.sep + 'options.json'
         with open(options_path, 'w') as outfile:
@@ -94,8 +94,14 @@ Examples:
 """
         if args == 'installed':
             installdir = self.minecraftdir + os.sep + 'mods' + os.sep + self.minecraft_target
-            files = os.listdir(installdir)
+            files = []
+            try:
+                files = os.listdir(installdir)
+            except OSError:
+                pass
+
             if not files:
+                print self.colortext("Looking in {}".format(installdir), self.terminal.C_YELLOW)
                 print "No mods installed"
                 return False
 
@@ -183,7 +189,7 @@ Example: creep info slimeknights/tconstruct
 Usage: creep install <packagename>
        creep install -l <listfilename>
 
-Example: creep install thecricket/chisel2 
+Example: creep install thecricket/chisel2
          creep install -l mymodlist.txt
 
 <listfilename> is a list of packages to install consisting of one package name per line
@@ -234,13 +240,13 @@ Example: creep install thecricket/chisel2
             if not os.path.isfile(cachedir + os.sep + package.get_local_filename()):
                 print self.colortext("Downloading mod '{0}' from {1}".format(package.name, package.get_download_location()), self.terminal.C_YELLOW)
                 downloadResult = package.download(cachedir)
-            
+
                 if not downloadResult:
                     print "Download failed."
                     return False
 
             # Most of the time this is the '~/.minecraft/mods' dir, but some mods have an alternate location for artifacts
-            savedir = self.minecraftdir + os.sep + package.installdir 
+            savedir = self.minecraftdir + os.sep + package.installdir
 
             # Tack on the minecraft version to the savedir
             if package.installdir == 'mods':
@@ -249,7 +255,7 @@ Example: creep install thecricket/chisel2
             if not os.path.isdir(savedir):
                 print self.colortext("Creating directory '{0}'".format(savedir))
                 os.mkdir(savedir)
-                
+
             if package.installstrategy:
                 self.install_with_strategy(package.installstrategy, package, cachedir, savedir)
 
@@ -261,7 +267,7 @@ Example: creep install thecricket/chisel2
         print "Reading packages from file '{}'...".format(listfile)
 
         if not os.path.isfile(listfile):
-            print self.colortext("File '{}' not found".format(listfile), self.terminal.C_RED) 
+            print self.colortext("File '{}' not found".format(listfile), self.terminal.C_RED)
             return 1
 
         # Read file and attempt to parse each line as a package name
@@ -303,7 +309,7 @@ Example: creep install thecricket/chisel2
         """Uninstall a package (mod)
 Usage: creep uninstall <packagename>
 
-Example: creep uninstall thecricket/chisel2 
+Example: creep uninstall thecricket/chisel2
 """
         package = self.repository.fetch_package(args)
         if not package:
