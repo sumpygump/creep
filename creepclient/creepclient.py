@@ -34,6 +34,9 @@ class CreepClient(Client, cmd.Cmd):
     # Version of minecraft to target for mods
     minecraft_target = '1.7.10'
 
+    # Whether should install dependencies too
+    install_dependencies = True
+
     def __init__(self, **kwargs):
         """Constructor"""
         cmd.Cmd.__init__(self)
@@ -130,9 +133,9 @@ Examples:
             self.print_package(package)
 
     def print_package(self, package):
-        message = '{name} {version} - {description} [{mcversion}]'.format(
+        message = '{name}:{version} - {description} [{mcversion}]'.format(
             name=package.name,
-            version=self.colortext('(' + package.version + ')', self.terminal.C_YELLOW),
+            version=self.colortext(package.version, self.terminal.C_YELLOW),
             description=self.colortext(package.description, self.terminal.C_MAGENTA),
             mcversion=self.colortext(package.get_minecraft_version(), self.terminal.C_YELLOW)
         )
@@ -186,8 +189,10 @@ Example: creep info slimeknights/tconstruct
 
     def do_install(self, args):
         """Install a package (mod)
-Usage: creep install <packagename>
-       creep install -l <listfilename>
+Usage: creep install [-n] <packagename>
+       creep install [-n] -l <listfilename>
+
+       The -n argument will NOT install dependencies automatically
 
 Example: creep install thecricket/chisel2
          creep install -l mymodlist.txt
@@ -199,6 +204,10 @@ Example: creep install thecricket/chisel2
         if len(args) == 0:
             print self.colortext("Missing argument", self.terminal.C_RED)
             return 1
+
+        if args[0] == '-n':
+            self.install_dependencies = False
+            args.pop(0)
 
         if args[0] == '-l':
             # Handle install from listfile
@@ -220,13 +229,14 @@ Example: creep install thecricket/chisel2
 
         print self.colortext("Installing package {}".format(package), self.terminal.C_BLUE)
 
-        # Install any required packages
-        # Warning: does not handle versions or circular dependencies
-        for dependency in package.require:
-            if dependency == 'minecraft' or dependency == 'forge':
-                continue
-            print self.colortext("Installing dependency '{}'".format(dependency), self.terminal.C_CYAN)
-            self.do_install(dependency)
+        if self.install_dependencies:
+            # Install any required packages
+            # Warning: does not handle versions or circular dependencies
+            for dependency in package.require:
+                if dependency == 'minecraft' or dependency == 'forge':
+                    continue
+                print self.colortext("Installing dependency '{}'".format(dependency), self.terminal.C_CYAN)
+                self.do_install(dependency)
 
         if package.type == 'collection':
             # Collection only has dependencies

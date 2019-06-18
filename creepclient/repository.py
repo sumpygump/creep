@@ -11,12 +11,12 @@ from pprint import pprint
 class Repository(object):
     """Repository class"""
 
-    remote_url = 'http://quantalideas.com/mcpackages/packages.json'
-    #remote_url = 'http://creep-packages.lvh.me/packages.json'
+    #remote_url = 'http://quantalideas.com/mcpackages/packages.json'
+    remote_url = 'http://creep-packages.lvh.me/packages.json'
     version_hash = ''
     version_date = ''
 
-    # Remove fetching timeout value (in seconds)
+    # Remote fetching timeout value (in seconds)
     timeout = 5
 
     # Local registry cache lifetime in seconds
@@ -63,7 +63,7 @@ class Repository(object):
                 print "Package definition file not found or no internet connection."
                 return {'packages': {}}
             return json.load(open(self.localdir))
-        
+
         # Check repository file date last modified
         # If it is older than specified time, redownload
         import calendar
@@ -182,17 +182,23 @@ class Repository(object):
         if name == '':
             return False
 
-        # only select from the latest versions (unique_packages)
-        # TODO allow to fetch a package for a specific version
-        for package in self.unique_packages:
-            if package.name == name:
-                return package
+        if ":" in name:
+            namepart,versionpart = name.split(":")
+            for package in self.packages:
+                if (package.name == namepart or package.get_simple_name() == namepart) and package.version == versionpart:
+                    return package
+        else:
+            # Only select from the latest versions (unique_packages)
+            for package in self.unique_packages:
+                if package.name == name:
+                    return package
 
-        if name in self.simple_name_packages:
-            if len(self.simple_name_packages[name]) > 1:
-                print "Multiple packages exist with name '{name}'".format(name=name)
-                return False
-            return self.simple_name_packages[name][0]
+            # Try to find based on the mod name (without vendor)
+            if name in self.simple_name_packages:
+                if len(self.simple_name_packages[name]) > 1:
+                    print "Multiple packages exist with name '{name}'".format(name=name)
+                    return False
+                return self.simple_name_packages[name][0]
 
         return False
 
