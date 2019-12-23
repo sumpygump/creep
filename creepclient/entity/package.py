@@ -29,11 +29,20 @@ class Package(Entity):
 
         url = self.get_download_location()
 
-        request = urllib2.Request(url, headers={'User-Agent' : "Creep Browser 0.1"}) 
+        # Using these specific headers to make the request seem like a browser.
+        # The old curseforge is using cloudflare to prevent bots
+        headers = {
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3",
+            "Accept-Language": "en-US,en;q=0.5",
+            "Accept-Encoding": "gzip, deflate, br",
+            "Upgrade-Insecure-Requests": "1",
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.87 Safari/537.36",
+        }
+        request = urllib2.Request(url, headers=headers)
         try:
             response = urllib2.urlopen(request)
-        except urllib2.URLError:
-            print "No internet connection. Cannot download file '" + self.get_download_location() + "'"
+        except urllib2.URLError as e:
+            print "No internet connection or unable to download file. Attempted to download '" + self.get_download_location() + "'"
             return False
 
         data = response.read()
