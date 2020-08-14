@@ -213,7 +213,7 @@ class Repository(object):
     def search(self, term):
         results = []
         for package in self.unique_packages:
-            if term in package.name.split('/'):
+            if term in re.split('\W?', package.name):
                 results.append(package)
                 continue
             if term in package.description.split():
@@ -222,6 +222,13 @@ class Repository(object):
             if term in package.keywords:
                 results.append(package)
                 continue
+
+        if len(results) == 0:
+            # Hmm, no results? try harder
+            for package in self.unique_packages:
+                if term in package.name or term in package.description:
+                    results.append(package)
+                    continue
 
         results.sort(key=attrgetter('name'))
         return results
