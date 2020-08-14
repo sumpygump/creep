@@ -47,7 +47,7 @@ class Package(Entity):
 
         data = response.read()
 
-        f = open(savelocation + os.sep + self.get_local_filename(), 'w')
+        f = open(savelocation + os.sep + self.get_local_filename(), 'wb')
         f.write(data)
         f.close()
 

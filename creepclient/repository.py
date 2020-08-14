@@ -33,7 +33,7 @@ class Repository(object):
     simple_name_packages = {}
 
     # Currently targeted version of minecraft
-    minecraft_target = "1.7.10"
+    minecraft_target = "1.16.1"
 
     def __init__(self, appdir):
         self.localdir = appdir + os.sep + 'packages.json'

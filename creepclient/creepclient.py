@@ -12,15 +12,18 @@ import sys # System specific parameters and functions
 import tempfile # Temporary file utilities
 import zipfile # Zip file utilities
 
+from lib import argparse
 from qi.console.client import Client
 from operator import attrgetter
 from repository import Repository
+
+DEFAULT_TARGET = "1.16.1"
 
 class CreepClient(Client, cmd.Cmd):
     """Creep Mod Package Manager Client"""
 
     # Version of this client
-    VERSION = '0.1.2'
+    VERSION = '0.1.3'
 
     # Absolute path where this client is installed
     installdir = ''
@@ -32,7 +35,10 @@ class CreepClient(Client, cmd.Cmd):
     minecraftdir = ''
 
     # Version of minecraft to target for mods
-    minecraft_target = '1.7.10'
+    minecraft_target = ''
+
+    # Directory for minecraft profile
+    profiledir = ''
 
     # Whether should install dependencies too
     install_dependencies = True
@@ -43,8 +49,8 @@ class CreepClient(Client, cmd.Cmd):
         Client.__init__(self, **kwargs)
 
         self.updateVersionWithGitDescribe()
-        self.updatePaths()
-        self.load_target()
+        self.update_paths()
+        self.load_options()
 
         self.createRepository()
 
@@ -52,6 +58,7 @@ class CreepClient(Client, cmd.Cmd):
         """Display creep version"""
         print self.colortext("Creep v{}".format(self.VERSION), self.terminal.C_GREEN)
         self.display_target()
+        self.display_profile()
 
     def do_target(self, args):
         """Set the targeted minecraft version
@@ -72,17 +79,46 @@ Examples:
     def display_target(self):
         print self.colortext("Targetting minecraft version {}".format(self.minecraft_target), self.terminal.C_GREEN)
 
-    def load_target(self):
+    def load_options(self):
         # TODO: More robust user options file handling. It should be its own object to load options
         options_path = self.appdir + os.sep + 'options.json'
         if os.path.isfile(options_path):
             options = json.load(open(options_path))
-            self.minecraft_target = options['minecraft_target']
+            self.minecraft_target = options.get('minecraft_target', DEFAULT_TARGET)
+            self.profiledir = options.get('profile_dir', self.minecraftdir)
+        else:
+            self.minecraft_target = DEFAULT_TARGET
+            self.profiledir = self.minecraftdir
 
     def save_options(self):
         options_path = self.appdir + os.sep + 'options.json'
         with open(options_path, 'w') as outfile:
-            json.dump({'minecraft_target': self.minecraft_target}, outfile)
+            json.dump({'minecraft_target': self.minecraft_target, 'profile_dir': self.profiledir}, outfile)
+
+    def do_profile(self, args):
+        """Set the path to the profile where you want to manage mods
+Usage: creep profile <path/to/minecraft/profile>
+
+Examples:
+  creep profile ~/.minecraft
+    Set the minecraft profile path
+"""
+        if len(args) > 0:
+            new_profile_dir = args.rstrip('/')
+
+            if new_profile_dir == '' or not os.path.isdir(new_profile_dir):
+                print self.colortext(
+                    "Invalid directory '{}'".format(new_profile_dir),
+                    self.terminal.C_RED
+                )
+            else:
+                self.profiledir = new_profile_dir
+
+        self.display_profile()
+        self.save_options()
+
+    def display_profile(self):
+        print self.colortext("Profile path '{}'".format(self.profiledir), self.terminal.C_GREEN)
 
     def do_list(self, args):
         """List packages (mods)
@@ -96,7 +132,7 @@ Examples:
      List installed packages
 """
         if args == 'installed':
-            installdir = self.minecraftdir + os.sep + 'mods' + os.sep + self.minecraft_target
+            installdir = self.profiledir + os.sep + 'mods'
             files = []
             try:
                 files = os.listdir(installdir)
@@ -133,7 +169,7 @@ Examples:
             self.print_package(package)
 
     def print_package(self, package):
-        message = '{name}:{version} - {description} [{mcversion}]'.format(
+        message = u'{name}:{version} - {description} [{mcversion}]'.format(
             name=package.name,
             version=self.colortext(package.version, self.terminal.C_YELLOW),
             description=self.colortext(package.description, self.terminal.C_MAGENTA),
@@ -174,7 +210,7 @@ Example: creep search nei
         """Display details for a specific package (mod)
 Usage: creep info <packagename>
 
-Example: creep info slimeknights/tconstruct
+Example: creep info slimeknights/tinkers-construct
 """
         if len(args) == 0:
             print self.colortext("Missing argument", self.terminal.C_RED)
@@ -188,16 +224,26 @@ Example: creep info slimeknights/tconstruct
         self.print_package_details(package)
 
     def do_install(self, args):
-        """Install a package (mod)
-Usage: creep install [-n] <packagename>
-       creep install [-n] -l <listfilename>
+        """Install a package (mod). This will install a given mod and its dependencies too
 
-       The -n argument will NOT install dependencies automatically
+Usage: creep install [options] (<packagename>|-l <filename>)
+  -n, --no-dependencies        Do not install dependencies automatically
+  -l, --listfile <filename>    Install packages from file; one package per line
 
-Example: creep install thecricket/chisel2
-         creep install -l mymodlist.txt
+<packagename> can be the name of the package in one of the following formats:
+  * package
+  * vendor/package
+  * package:version
+  * vendor/package:version
 
-<listfilename> is a list of packages to install consisting of one package name per line
+Creep only considers packages that are in the current targeted minecraft version.
+  See `creep help target` for details.
+
+Examples: creep install just-enough-items
+          creep install mezz/just-enough-items
+          creep install just-enough-items:1.12.2-4.9.2.196
+          creep install mezz/just-enough-items:1.12.2-4.9.2.196
+          creep install -l mymodlist.txt
 """
         args = shlex.split(args)
 
@@ -205,42 +251,48 @@ Example: creep install thecricket/chisel2
             print self.colortext("Missing argument", self.terminal.C_RED)
             return 1
 
-        if args[0] == '-n':
+        parser = argparse.ArgumentParser(add_help=False, prog='creep install')
+        parser.add_argument('packages', nargs='*')
+        parser.add_argument('-n', '--no-dependencies', action='store_true')
+        parser.add_argument('-l', '--listfile', help='Install packages from file')
+
+        (pargs, remaining_args) = parser.parse_known_args(args)
+
+        if pargs.no_dependencies:
+            print self.colortext("Performing install and skipping dependencies\n", self.terminal.C_YELLOW)
             self.install_dependencies = False
-            args.pop(0)
 
-        if args[0] == '-l':
-            # Handle install from listfile
-            try:
-                listfile = args[1]
-            except IndexError:
-                print self.colortext("Missing argument for listfile", self.terminal.C_RED)
-                return 1
-            self.install_from_listfile(listfile)
-        else:
+        if pargs.packages:
             # Handle install individual package
-            self.install_package(args[0])
+            for packagename in pargs.packages:
+                self.install_package(packagename)
 
-    def install_package(self, args):
-        package = self.repository.fetch_package(args)
+        if pargs.listfile:
+            # Handle install from listfile
+            self.install_from_listfile(pargs.listfile)
+
+    def install_package(self, packagename):
+        package = self.repository.fetch_package(packagename)
         if not package:
-            print self.colortext("Unknown package '{}'".format(args), self.terminal.C_RED)
+            print self.colortext("Unknown package '{}'".format(packagename), self.terminal.C_RED)
             return 1
 
         print self.colortext("Installing package {}".format(package), self.terminal.C_BLUE)
 
-        if self.install_dependencies:
-            # Install any required packages
-            # Warning: does not handle versions or circular dependencies
-            for dependency in package.require:
-                if dependency == 'minecraft' or dependency == 'forge':
-                    continue
+        # Install any required packages
+        # Warning: does not handle versions or circular dependencies
+        for dependency in package.require:
+            if dependency == 'minecraft' or dependency == 'forge':
+                continue
+            if self.install_dependencies:
                 print self.colortext("Installing dependency '{}'".format(dependency), self.terminal.C_CYAN)
-                self.do_install(dependency)
+                self.install_package(dependency)
+            else:
+                print self.colortext("Skipping dependency '{}'".format(dependency), self.terminal.C_YELLOW)
 
         if package.type == 'collection':
             # Collection only has dependencies
-            print self.colortext("Installed collection '{0}'".format(package.name), self.terminal.C_GREEN)
+            print self.colortext("  Installed collection '{0}'".format(package.name), self.terminal.C_GREEN)
         else:
             cachedir = self.appdir + os.sep + 'cache' + os.sep + package.installdir
 
@@ -248,7 +300,7 @@ Example: creep install thecricket/chisel2
                 os.mkdir(cachedir)
 
             if not os.path.isfile(cachedir + os.sep + package.get_local_filename()):
-                print self.colortext("Downloading mod '{0}' from {1}".format(package.name, package.get_download_location()), self.terminal.C_YELLOW)
+                print self.colortext("  Downloading mod '{0}' from {1}".format(package.name, package.get_download_location()), self.terminal.C_YELLOW)
                 downloadResult = package.download(cachedir)
 
                 if not downloadResult:
@@ -256,11 +308,7 @@ Example: creep install thecricket/chisel2
                     return False
 
             # Most of the time this is the '~/.minecraft/mods' dir, but some mods have an alternate location for artifacts
-            savedir = self.minecraftdir + os.sep + package.installdir
-
-            # Tack on the minecraft version to the savedir
-            if package.installdir == 'mods':
-                savedir = savedir + os.sep + package.require['minecraft']
+            savedir = self.profiledir + os.sep + package.installdir
 
             if not os.path.isdir(savedir):
                 print self.colortext("Creating directory '{0}'".format(savedir))
@@ -271,7 +319,7 @@ Example: creep install thecricket/chisel2
 
             shutil.copyfile(cachedir + os.sep + package.get_local_filename(), savedir + os.sep + package.get_local_filename())
 
-            print self.colortext("Installed mod '{0}' in '{1}'".format(package.name, savedir + os.sep + package.get_local_filename()), self.terminal.C_GREEN)
+            print self.colortext("  Installed mod '{0}' in '{1}'".format(package.name, savedir + os.sep + package.get_local_filename()), self.terminal.C_GREEN)
 
     def install_from_listfile(self, listfile):
         print "Reading packages from file '{}'...".format(listfile)
@@ -287,7 +335,6 @@ Example: creep install thecricket/chisel2
                 self.install_package(args[0])
 
     def install_with_strategy(self, installstrategy, package, cachedir, savedir):
-
         print "Installing with strategy: " + installstrategy
 
         if ';' in installstrategy:
@@ -326,10 +373,7 @@ Example: creep uninstall thecricket/chisel2
             print 'Unknown package {}'.format(args)
             return 1
 
-        if package.installdir == 'mods':
-            savedir = self.minecraftdir + os.sep + package.installdir + os.sep + self.minecraft_target
-        else:
-            savedir = self.minecraftdir + os.sep + package.installdir
+        savedir = self.profiledir + os.sep + package.installdir
 
         os.remove(savedir + os.sep + package.get_local_filename())
         print "Removed mod '{0}' from '{1}'".format(package.name, savedir)
@@ -338,7 +382,7 @@ Example: creep uninstall thecricket/chisel2
         """Purge all installed packages (mods)
 Usage: creep purge
 """
-        installdir = self.minecraftdir + os.sep + 'mods' + os.sep + self.minecraft_target
+        installdir = self.minecraftdir + os.sep + 'mods'
         print "Purging all installed mods in {}...".format(installdir)
         self.delete_path(installdir)
         print "Done."
@@ -376,8 +420,8 @@ Usage: creep purge
         else:
             self.repository.populate('', True)
 
-    def updatePaths(self):
-        self.installdir = os.path.dirname(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))))
+    def update_paths(self):
+        #self.installdir = os.path.dirname(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))))
 
         self.appdir = self.getHomePath('.creep')
         if not os.path.isdir(self.appdir):
@@ -436,7 +480,7 @@ Usage: creep purge
             boldstart = ''
             boldend = ''
 
-        return '{bold}{start}{text}{end}{unbold}'.format(
+        return u'{bold}{start}{text}{end}{unbold}'.format(
             bold=boldstart,
             start=self.colorstart(forecolor, backcolor),
             text=text,

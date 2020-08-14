@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 # -*- coding: UTF-8 -*-
 
 import sys # System specific parameters and functions
@@ -28,16 +28,16 @@ if __name__ == "__main__":
         status = client.onecmd(' '.join(remaining_args[1:]))
     else:
         client.do_version('')
-        print u"█████████████████"
-        print u"█░░░░░░░░░░░░░░░█"
-        print u"█░░████░░░████░░█"
-        print u"█░░████░░░████░░█"
-        print u"█░░░░░░███░░░░░░█"
-        print u"█░░░░███████░░░░█"
-        print u"█░░░░███████░░░░█"
-        print u"█░░░░██░░░██░░░░█"
-        print u"█░░░░░░░░░░░░░░░█"
-        print u"█████████████████"
+        print(u"█████████████████")
+        print(u"█░░░░░░░░░░░░░░░█")
+        print(u"█░░████░░░████░░█")
+        print(u"█░░████░░░████░░█")
+        print(u"█░░░░░░███░░░░░░█")
+        print(u"█░░░░███████░░░░█")
+        print(u"█░░░░███████░░░░█")
+        print(u"█░░░░██░░░██░░░░█")
+        print(u"█░░░░░░░░░░░░░░░█")
+        print(u"█████████████████")
 
         status = client.onecmd('help')
 
