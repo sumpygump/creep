@@ -17,9 +17,8 @@ def cmp(a, b):
 class Repository(object):
     """Repository class"""
 
-    #remote_url = 'https://bitbucket.org/sumpygump/creep-packages-storage/raw/fa8bc2e00fbf09534e33d8a625b1b5e272122c29/packages.json'
-    #remote_url = 'http://quantalideas.com/mcpackages/packages.json'
-    remote_url = 'http://creep-packages.lvh.me/packages.json'
+    remote_url = 'http://quantalideas.com/mcpackages/packages.json'
+    #remote_url = 'http://creep-packages.lvh.me/packages.json'
     version_hash = ''
     version_date = ''
 
