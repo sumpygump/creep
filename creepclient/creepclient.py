@@ -558,7 +558,7 @@ Usage: creep purge
 
 Use command `creep list installed` to see the list of currently installed mods
 """
-        installdir = self.minecraftdir + os.sep + 'mods'
+        installdir = self.profiledir + os.sep + 'mods'
         print("Purging all installed mods in {}...".format(installdir))
         self.delete_path(installdir)
         print("Done.")
