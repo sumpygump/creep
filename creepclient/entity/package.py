@@ -42,7 +42,7 @@ class Package(Entity):
         try:
             response = urllib2.urlopen(request)
         except urllib2.URLError as e:
-            print "No internet connection or unable to download file. Attempted to download '" + self.get_download_location() + "'"
+            print("No internet connection or unable to download file. Attempted to download '" + self.get_download_location() + "'")
             return False
 
         data = response.read()

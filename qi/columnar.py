@@ -44,11 +44,11 @@ class Columnar(object):
         return self
 
     def render(self, do_print = True):
-        print self.renderHeaders()
+        print(self.renderHeaders())
 
         if do_print:
             for row in self:
-                print row
+                print(row)
         else:
             output = ''
             for row in self:

@@ -114,7 +114,7 @@ class Terminal(object):
             + padding \
             + end
 
-        print out
+        print(out)
 
         return self
 

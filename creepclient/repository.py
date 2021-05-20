@@ -3,10 +3,16 @@
 import json # JSON encoder and decoder
 import os # Miscellaneous operating system interfaces
 import re # Regular expressions
+import urllib.request
+import urllib.error
 
 from operator import attrgetter
-from entity.package import Package
-from pprint import pprint
+from .entity.package import Package
+
+
+def cmp(a, b):
+    return (a > b) - (a < b)
+
 
 class Repository(object):
     """Repository class"""
@@ -42,17 +48,15 @@ class Repository(object):
         self.minecraft_target = target
 
     def download_remote_repository(self):
-        import urllib2
-
-        print "Refreshing registry file from " + self.remote_url
+        print("Refreshing registry file from " + self.remote_url)
         try:
-            response = urllib2.urlopen(self.remote_url, None, self.timeout)
-        except urllib2.URLError:
+            response = urllib.request.urlopen(self.remote_url, None, self.timeout)
+        except urllib.error.URLError:
             return False
 
         data = response.read()
 
-        f = open(self.localdir, 'w')
+        f = open(self.localdir, 'wb')
         f.write(data)
         f.close()
         return True
@@ -61,7 +65,7 @@ class Repository(object):
         # Repository file doesn't exist, fetch it from remote url
         if not os.path.isfile(self.localdir):
             if not self.download_remote_repository():
-                print "Package definition file not found or no internet connection."
+                print("Package definition file not found or no internet connection.")
                 return {'packages': {}}
             return json.load(open(self.localdir))
 
@@ -72,7 +76,7 @@ class Repository(object):
         filetime = os.stat(self.localdir).st_mtime
         if filetime + self.cache_life < calendar.timegm(time.gmtime()):
             if not self.download_remote_repository():
-                print "No internet connection. Using current version of repository. Date: {}".format(time.ctime(filetime))
+                print("No internet connection. Using current version of repository. Date: {}".format(time.ctime(filetime)))
 
         return json.load(open(self.localdir))
 
@@ -197,7 +201,7 @@ class Repository(object):
             # Try to find based on the mod name (without vendor)
             if name in self.simple_name_packages:
                 if len(self.simple_name_packages[name]) > 1:
-                    print "Multiple packages exist with name '{name}'".format(name=name)
+                    print("Multiple packages exist with name '{name}'".format(name=name))
                     return False
                 return self.simple_name_packages[name][0]
 

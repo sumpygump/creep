@@ -45,4 +45,4 @@ class Terminfo(object):
             result = curses.tparm(cap, int(args[0]))
         else:
             result = curses.tparm(cap)
-        return result
+        return result.decode("utf-8")

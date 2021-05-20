@@ -1,5 +1,6 @@
 """CLI client for creep"""
 
+import argparse
 import cmd # Command interpreter logic. Gives us the base class for the client
 import distutils.dir_util # Directory utilities
 import inspect # Functions to inspect live objects
@@ -12,10 +13,9 @@ import sys # System specific parameters and functions
 import tempfile # Temporary file utilities
 import zipfile # Zip file utilities
 
-from lib import argparse
 from qi.console.client import Client
 from operator import attrgetter
-from repository import Repository
+from .repository import Repository
 
 DEFAULT_TARGET = "1.16.1"
 
@@ -56,7 +56,7 @@ class CreepClient(Client, cmd.Cmd):
 
     def do_version(self, args):
         """Display creep version"""
-        print self.colortext("Creep v{}".format(self.VERSION), self.terminal.C_GREEN)
+        print(self.colortext("Creep v{}".format(self.VERSION), self.terminal.C_GREEN))
         self.display_target()
         self.display_profile()
 
@@ -77,7 +77,7 @@ Examples:
         self.save_options()
 
     def display_target(self):
-        print self.colortext("Targetting minecraft version {}".format(self.minecraft_target), self.terminal.C_GREEN)
+        print(self.colortext("Targetting minecraft version {}".format(self.minecraft_target), self.terminal.C_GREEN))
 
     def load_options(self):
         # TODO: More robust user options file handling. It should be its own object to load options
@@ -107,10 +107,10 @@ Examples:
             new_profile_dir = args.rstrip('/')
 
             if new_profile_dir == '' or not os.path.isdir(new_profile_dir):
-                print self.colortext(
+                print(self.colortext(
                     "Invalid directory '{}'".format(new_profile_dir),
                     self.terminal.C_RED
-                )
+                ))
             else:
                 self.profiledir = new_profile_dir
 
@@ -118,7 +118,7 @@ Examples:
         self.save_options()
 
     def display_profile(self):
-        print self.colortext("Profile path '{}'".format(self.profiledir), self.terminal.C_GREEN)
+        print(self.colortext("Profile path '{}'".format(self.profiledir), self.terminal.C_GREEN))
 
     def do_list(self, args):
         """List packages (mods)
@@ -140,8 +140,8 @@ Examples:
                 pass
 
             if not files:
-                print self.colortext("Looking in {}".format(installdir), self.terminal.C_YELLOW)
-                print "No mods installed"
+                print(self.colortext("Looking in {}".format(installdir), self.terminal.C_YELLOW))
+                print("No mods installed")
                 return False
 
             packages = []
@@ -155,11 +155,11 @@ Examples:
 
             packages.sort(key=attrgetter('name'))
 
-            print self.colortext("Installed mods (in {}):".format(installdir), self.terminal.C_YELLOW)
+            print(self.colortext("Installed mods (in {}):".format(installdir), self.terminal.C_YELLOW))
             for package in packages:
                 self.print_package(package)
             for name in unknownfiles:
-                print self.colortext(name, self.terminal.C_RED)
+                print(self.colortext(name, self.terminal.C_RED))
         else:
             self.display_packages()
 
@@ -179,19 +179,19 @@ Examples:
         if package.type == 'collection':
             message = message + self.colortext(' [collection]', self.terminal.C_CYAN)
 
-        print message
+        print(message)
 
     def print_package_details(self, package):
-        print package.name
-        print '--------'
-        print "Version: " + package.version
-        print "Description: " + package.description
-        print "Package Type: " + package.type
-        print "Keywords: " + package.keywords
-        print "Homepage: " + package.homepage
-        print "Dependencies: "
-        for key,value in package.require.iteritems():
-            print " - " + key + ": " + value
+        print(package.name)
+        print('--------')
+        print("Version: " + package.version)
+        print("Description: " + package.description)
+        print("Package Type: " + package.type)
+        print("Keywords: " + package.keywords)
+        print("Homepage: " + package.homepage)
+        print("Dependencies: ")
+        for key, value in package.require.items():
+            print(" - " + key + ": " + value)
 
     def do_search(self, args):
         """Search for a package (mod)
@@ -213,12 +213,12 @@ Usage: creep info <packagename>
 Example: creep info slimeknights/tinkers-construct
 """
         if len(args) == 0:
-            print self.colortext("Missing argument", self.terminal.C_RED)
+            print(self.colortext("Missing argument", self.terminal.C_RED))
             return 1
 
         package = self.repository.fetch_package(args)
         if not package:
-            print self.colortext("Unknown package '{}'".format(args), self.terminal.C_RED)
+            print(self.colortext("Unknown package '{}'".format(args), self.terminal.C_RED))
             return 1
 
         self.print_package_details(package)
@@ -248,7 +248,7 @@ Examples: creep install just-enough-items
         args = shlex.split(args)
 
         if len(args) == 0:
-            print self.colortext("Missing argument", self.terminal.C_RED)
+            print(self.colortext("Missing argument", self.terminal.C_RED))
             return 1
 
         parser = argparse.ArgumentParser(add_help=False, prog='creep install')
@@ -259,7 +259,7 @@ Examples: creep install just-enough-items
         (pargs, remaining_args) = parser.parse_known_args(args)
 
         if pargs.no_dependencies:
-            print self.colortext("Performing install and skipping dependencies\n", self.terminal.C_YELLOW)
+            print(self.colortext("Performing install and skipping dependencies\n", self.terminal.C_YELLOW))
             self.install_dependencies = False
 
         if pargs.packages:
@@ -274,10 +274,10 @@ Examples: creep install just-enough-items
     def install_package(self, packagename):
         package = self.repository.fetch_package(packagename)
         if not package:
-            print self.colortext("Unknown package '{}'".format(packagename), self.terminal.C_RED)
+            print(self.colortext("Unknown package '{}'".format(packagename), self.terminal.C_RED))
             return 1
 
-        print self.colortext("Installing package {}".format(package), self.terminal.C_BLUE)
+        print(self.colortext("Installing package {}".format(package), self.terminal.C_BLUE))
 
         # Install any required packages
         # Warning: does not handle versions or circular dependencies
@@ -285,14 +285,14 @@ Examples: creep install just-enough-items
             if dependency == 'minecraft' or dependency == 'forge':
                 continue
             if self.install_dependencies:
-                print self.colortext("Installing dependency '{}'".format(dependency), self.terminal.C_CYAN)
+                print(self.colortext("Installing dependency '{}'".format(dependency), self.terminal.C_CYAN))
                 self.install_package(dependency)
             else:
-                print self.colortext("Skipping dependency '{}'".format(dependency), self.terminal.C_YELLOW)
+                print(self.colortext("Skipping dependency '{}'".format(dependency), self.terminal.C_YELLOW))
 
         if package.type == 'collection':
             # Collection only has dependencies
-            print self.colortext("  Installed collection '{0}'".format(package.name), self.terminal.C_GREEN)
+            print(self.colortext("  Installed collection '{0}'".format(package.name), self.terminal.C_GREEN))
         else:
             cachedir = self.appdir + os.sep + 'cache' + os.sep + package.installdir
 
@@ -300,18 +300,18 @@ Examples: creep install just-enough-items
                 os.mkdir(cachedir)
 
             if not os.path.isfile(cachedir + os.sep + package.get_local_filename()):
-                print self.colortext("  Downloading mod '{0}' from {1}".format(package.name, package.get_download_location()), self.terminal.C_YELLOW)
+                print(self.colortext("  Downloading mod '{0}' from {1}".format(package.name, package.get_download_location()), self.terminal.C_YELLOW))
                 downloadResult = package.download(cachedir)
 
                 if not downloadResult:
-                    print "Download failed."
+                    print("Download failed.")
                     return False
 
             # Most of the time this is the '~/.minecraft/mods' dir, but some mods have an alternate location for artifacts
             savedir = self.profiledir + os.sep + package.installdir
 
             if not os.path.isdir(savedir):
-                print self.colortext("Creating directory '{0}'".format(savedir))
+                print(self.colortext("Creating directory '{0}'".format(savedir)))
                 os.mkdir(savedir)
 
             if package.installstrategy:
@@ -319,13 +319,13 @@ Examples: creep install just-enough-items
 
             shutil.copyfile(cachedir + os.sep + package.get_local_filename(), savedir + os.sep + package.get_local_filename())
 
-            print self.colortext("  Installed mod '{0}' in '{1}'".format(package.name, savedir + os.sep + package.get_local_filename()), self.terminal.C_GREEN)
+            print(self.colortext("  Installed mod '{0}' in '{1}'".format(package.name, savedir + os.sep + package.get_local_filename()), self.terminal.C_GREEN))
 
     def install_from_listfile(self, listfile):
-        print "Reading packages from file '{}'...".format(listfile)
+        print("Reading packages from file '{}'...".format(listfile))
 
         if not os.path.isfile(listfile):
-            print self.colortext("File '{}' not found".format(listfile), self.terminal.C_RED)
+            print(self.colortext("File '{}' not found".format(listfile), self.terminal.C_RED))
             return 1
 
         # Read file and attempt to parse each line as a package name
@@ -335,7 +335,7 @@ Examples: creep install just-enough-items
                 self.install_package(args[0])
 
     def install_with_strategy(self, installstrategy, package, cachedir, savedir):
-        print "Installing with strategy: " + installstrategy
+        print("Installing with strategy: " + installstrategy)
 
         if ';' in installstrategy:
             strategies = installstrategy.split(';')
@@ -351,10 +351,10 @@ Examples: creep install just-enough-items
         for strategy in strategies:
             args = shlex.split(strategy)
             if args[0] == 'unzip':
-                print 'Unzipping archive: ' + cachedir + os.sep + package.get_local_filename()
+                print('Unzipping archive: ' + cachedir + os.sep + package.get_local_filename())
                 self.unzip(cachedir + os.sep + package.get_local_filename(), tmppath)
             elif args[0] == 'move':
-                print 'Moving files: ' + args[1]
+                print('Moving files: ' + args[1])
                 path = args[1]
                 if path[-2:] == '/*':
                     path = path.replace('/*', '')
@@ -370,30 +370,30 @@ Example: creep uninstall thecricket/chisel2
 """
         package = self.repository.fetch_package(args)
         if not package:
-            print 'Unknown package {}'.format(args)
+            print('Unknown package {}'.format(args))
             return 1
 
         savedir = self.profiledir + os.sep + package.installdir
 
         os.remove(savedir + os.sep + package.get_local_filename())
-        print "Removed mod '{0}' from '{1}'".format(package.name, savedir)
+        print("Removed mod '{0}' from '{1}'".format(package.name, savedir))
 
     def do_purge(self, args):
         """Purge all installed packages (mods)
 Usage: creep purge
 """
         installdir = self.minecraftdir + os.sep + 'mods'
-        print "Purging all installed mods in {}...".format(installdir)
+        print("Purging all installed mods in {}...".format(installdir))
         self.delete_path(installdir)
-        print "Done."
+        print("Done.")
 
     def do_refresh(self, args):
         """Force an refresh of the package repository"""
 
         self.repository.clear_cache()
         self.repository.populate()
-        print self.colortext("Repository updated to version {} ({}).".format(self.repository.version_hash, self.repository.version_date), self.terminal.C_GREEN)
-        print "Count: {} packages.".format(self.repository.count_packages())
+        print(self.colortext("Repository updated to version {} ({}).".format(self.repository.version_hash, self.repository.version_date), self.terminal.C_GREEN))
+        print("Count: {} packages.".format(self.repository.count_packages()))
 
     def delete_path(self, rootdir):
         files = os.listdir(rootdir)
@@ -402,11 +402,11 @@ Usage: creep purge
                 self.delete_path(rootdir + os.sep + f)
                 os.rmdir(rootdir + os.sep + f)
             else:
-                print self.colortext('Removing file {}'.format(f), self.terminal.C_RED)
+                print(self.colortext('Removing file {}'.format(f), self.terminal.C_RED))
                 try:
                     os.remove(rootdir + os.sep + f)
                 except OSError:
-                    print 'opa'
+                    print('opa')
                     continue
 
     def createRepository(self):
@@ -440,8 +440,8 @@ Usage: creep purge
             self.minecraftdir = self.getHomePath('.minecraft')
 
         if not os.path.isdir(self.minecraftdir):
-            print "Minecraft dir not found ({})".format(self.minecraftdir)
-            print "Is Minecraft installed?"
+            print("Minecraft dir not found ({})".format(self.minecraftdir))
+            print("Is Minecraft installed?")
             sys.exit(2)
 
         if not os.path.isdir(self.minecraftdir + os.sep + 'mods'):
@@ -461,7 +461,7 @@ Usage: creep purge
         appdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 
         try:
-            self.VERSION = subprocess.check_output(['git', '-C', appdir, 'describe'], stderr=subprocess.STDOUT).strip()
+            self.VERSION = subprocess.check_output(['git', '-C', appdir, 'describe'], stderr=subprocess.STDOUT).strip().decode("utf-8")
         except OSError:
             pass
         except subprocess.CalledProcessError:
@@ -480,7 +480,7 @@ Usage: creep purge
             boldstart = ''
             boldend = ''
 
-        return u'{bold}{start}{text}{end}{unbold}'.format(
+        return '{bold}{start}{text}{end}{unbold}'.format(
             bold=boldstart,
             start=self.colorstart(forecolor, backcolor),
             text=text,
@@ -491,9 +491,9 @@ Usage: creep purge
     def colorstart(self, forecolor=None, backcolor=None):
         coloring = ''
         if forecolor is not None:
-            coloring += self.terminal.setaf(forecolor)
+            coloring = "{}{}".format(coloring, self.terminal.setaf(forecolor))
         if backcolor is not None:
-            coloring += self.terminal.setab(backcolor)
+            coloring = "{}{}".format(coloring, self.terminal.setab(backcolor))
 
         return coloring
 
