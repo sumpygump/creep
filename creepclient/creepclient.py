@@ -179,7 +179,12 @@ Examples:
         if package.type == 'collection':
             message = message + self.colortext(' [collection]', self.terminal.C_CYAN)
 
-        print(message)
+        try:
+            print(message)
+        except (BrokenPipeError, IOError):
+            # Handles quitting before finishing the listing
+            # E.g. `creep list | head`
+            sys.stderr.close()
 
     def print_package_details(self, package):
         print(package.name)
