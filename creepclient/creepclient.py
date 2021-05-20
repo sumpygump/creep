@@ -17,13 +17,13 @@ from qi.console.client import Client
 from operator import attrgetter
 from .repository import Repository
 
-DEFAULT_TARGET = "1.16.1"
+DEFAULT_TARGET = "1.16.5"
 
 class CreepClient(Client, cmd.Cmd):
     """Creep Mod Package Manager Client"""
 
     # Version of this client
-    VERSION = '0.1.3'
+    VERSION = '1.0'
 
     # Absolute path where this client is installed
     installdir = ''
@@ -48,11 +48,11 @@ class CreepClient(Client, cmd.Cmd):
         cmd.Cmd.__init__(self)
         Client.__init__(self, **kwargs)
 
-        self.updateVersionWithGitDescribe()
+        self.update_version_with_git_describe()
         self.update_paths()
         self.load_options()
 
-        self.createRepository()
+        self.create_repository()
 
     def do_version(self, args):
         """Display creep version"""
@@ -65,7 +65,7 @@ class CreepClient(Client, cmd.Cmd):
 Usage: creep target <minecraft_version>
 
 Examples:
-  creep target 1.7.10
+  creep target 1.16.5
      Set the version of minecraft for mods
 """
         if len(args) > 0:
@@ -133,35 +133,49 @@ Examples:
 """
         if args == 'installed':
             installdir = self.profiledir + os.sep + 'mods'
-            files = []
-            try:
-                files = os.listdir(installdir)
-            except OSError:
-                pass
-
-            if not files:
-                print(self.colortext("Looking in {}".format(installdir), self.terminal.C_YELLOW))
-                print("No mods installed")
-                return False
-
-            packages = []
-            unknownfiles = []
-            for name in files:
-                package = self.repository.fetch_package_byfilename(name)
-                if not package:
-                    unknownfiles.append(name)
-                else:
-                    packages.append(package)
-
-            packages.sort(key=attrgetter('name'))
-
-            print(self.colortext("Installed mods (in {}):".format(installdir), self.terminal.C_YELLOW))
-            for package in packages:
-                self.print_package(package)
-            for name in unknownfiles:
-                print(self.colortext(name, self.terminal.C_RED))
+            self.get_packages_in_dir(installdir, display_list = True)
         else:
             self.display_packages()
+
+    def get_packages_in_dir(self, dir_name, display_list = False, include_unknowns = True):
+        ignore = ['.DS_Store']
+        files = []
+        try:
+            files = os.listdir(dir_name)
+        except OSError:
+            pass
+
+        if not files:
+            if display_list:
+                print(self.colortext("Looking in {}".format(dir_name), self.terminal.C_YELLOW))
+                print("No mods installed")
+            return False
+
+        library = {}
+        packages = []
+        unknownfiles = []
+        for name in files:
+            if name in ignore:
+                continue
+            package = self.repository.fetch_package_byfilename(name)
+            if not package:
+                library[name] = None
+                unknownfiles.append(name)
+            else:
+                library[name] = package
+                packages.append(package)
+
+        packages.sort(key=attrgetter('name'))
+
+        if display_list:
+            print(self.colortext("Installed mods (in {}):".format(dir_name), self.terminal.C_YELLOW))
+            for package in packages:
+                self.print_package(package)
+            if include_unknowns:
+                for name in unknownfiles:
+                    print(self.colortext(name, self.terminal.C_RED))
+
+        return library
 
     def display_packages(self):
         """Display list of packages available"""
@@ -199,10 +213,14 @@ Examples:
             print(" - " + key + ": " + value)
 
     def do_search(self, args):
-        """Search for a package (mod)
+        """Search for a package (mod) in the package registry
+
 Usage: creep search <packagename>
 
-Example: creep search nei
+Examples: creep search jade
+          creep search optifine
+          creep search tools
+          creep search blake
 """
         if args == '':
             return False
@@ -383,9 +401,162 @@ Example: creep uninstall thecricket/chisel2
         os.remove(savedir + os.sep + package.get_local_filename())
         print("Removed mod '{0}' from '{1}'".format(package.name, savedir))
 
+    def do_stash(self, args):
+        """Stash list of installed mods to a saved directory that can be restored later.
+
+Usage: creep stash <subcommand> <stash-name>
+       creep stash list
+
+Subcommands:
+ - save <stash-name> : Saves the currently installed mods into a stash with given name
+        and empties the install directory.
+ - info <stash-name> : Show the mod files present in a given stash.
+ - restore <stash-name> : Installs the mods from the given stash into the install directory
+        and removes the stash.
+ - apply <stash-name> : Installs the mods from the given stash into the install directory
+        but keep the stash in tact.
+ - list : List the currently available stashes.
+
+Examples: creep stash save my-world
+          creep stash info my-world
+          creep stash restore my-world
+          creep stash apply my-world
+          creep stash list
+
+Use command `creep list installed` to see the list of currently installed mods
+        """
+        args = shlex.split(args)
+
+        if len(args) == 0:
+            print(self.colortext("Stash: Missing argument <subcommand>", self.terminal.C_RED))
+            return 1
+
+        parser = argparse.ArgumentParser(add_help=False, prog='creep stash')
+        parser.add_argument('subcommand')
+        parser.add_argument('stash_name', nargs="?")
+
+        (pargs, remaining_args) = parser.parse_known_args(args)
+
+        if pargs.subcommand == 'list':
+            return self.list_stashes()
+
+        if pargs.subcommand not in ['save', 'restore', 'info', 'pop', 'apply']:
+            print(self.colortext("Stash: Invalid subcommand {}".format(pargs.subcommand), self.terminal.C_RED))
+            return 1
+
+        # The remaining subcommands require a stash name arg
+        if not pargs.stash_name:
+            print(self.colortext("Stash: Missing argument <stash_name>", self.terminal.C_RED))
+            return 1
+
+        if pargs.subcommand == 'save':
+            return self.save_stash(pargs.stash_name)
+
+        if pargs.subcommand == 'info':
+            return self.stash_info(pargs.stash_name)
+
+        if pargs.subcommand == 'restore' or pargs.subcommand == 'pop':
+            return self.restore_stash(pargs.stash_name)
+
+        if pargs.subcommand == 'apply':
+            return self.restore_stash(pargs.stash_name, copy_mode = True)
+
+    def list_stashes(self):
+        stashes = self.get_stashes()
+        if not stashes:
+            print(self.colortext("Looking in {}".format(self.get_stashes_dir()), self.terminal.C_YELLOW))
+            print("No stashes")
+
+        for file in stashes:
+            print(file)
+
+        return 0
+
+    def get_stashes_dir(self):
+        return self.profiledir + os.sep + 'stashes'
+
+    def get_stashes(self):
+        stashes = []
+        try:
+            stashes = os.listdir(self.get_stashes_dir())
+        except OSError:
+            pass
+
+        return sorted(stashes)
+
+    def save_stash(self, stash_name):
+        stashes_dir = self.get_stashes_dir()
+        if not os.path.isdir(stashes_dir):
+            os.mkdir(stashes_dir)
+
+        stash_dir = stashes_dir + os.sep + stash_name
+
+        if os.path.exists(stash_dir):
+            print(self.colortext("Stash with name {} already exists.".format(stash_name), self.terminal.C_RED))
+            return 1
+        else:
+            os.mkdir(stash_dir)
+
+        # Collect everything from the mods dir and put it in the stash dir
+        installdir = self.profiledir + os.sep + 'mods'
+        packages = self.get_packages_in_dir(installdir)
+
+        print("Will stash the following files into stash {}:".format(stash_name))
+        files = sorted(packages.keys())
+
+        for file in files:
+            print(file)
+            from_ = installdir + os.sep + file
+            to_ = stash_dir + os.sep + file
+            shutil.move(from_, to_)
+
+    def stash_info(self, stash_name):
+        stashes_dir = self.get_stashes_dir()
+        stash_dir = stashes_dir + os.sep + stash_name
+
+        if not os.path.isdir(stash_dir):
+            print(self.colortext("No stash with name {}".format(stash_name), self.terminal.C_RED))
+            return 1
+
+        self.get_packages_in_dir(stash_dir, display_list = True, include_unknowns = True)
+        return 0
+
+    def restore_stash(self, stash_name, copy_mode = False):
+        stashes_dir = self.get_stashes_dir()
+        stash_dir = stashes_dir + os.sep + stash_name
+
+        if not os.path.isdir(stash_dir):
+            print(self.colortext("No stash with name {}".format(stash_name), self.terminal.C_RED))
+            return 1
+
+        # Collect everything from the stash dir and put it in the mods install dir
+        installdir = self.profiledir + os.sep + 'mods'
+        packages = self.get_packages_in_dir(stash_dir)
+
+        files = sorted(packages.keys())
+
+        verb = "Applying" if copy_mode else "Moving"
+        print("{} files from stash {} to install dir.".format(verb, stash_dir))
+        for file in files:
+            print(file)
+            from_ = stash_dir + os.sep + file
+            to_ = installdir + os.sep + file
+            if copy_mode:
+                shutil.copy(from_, to_)
+            else:
+                shutil.move(from_, to_)
+
+        if not copy_mode:
+            # Delete the stash dir
+            print("Deleting stash dir {}".format(stash_name))
+            shutil.rmtree(stash_dir)
+
     def do_purge(self, args):
-        """Purge all installed packages (mods)
+        """Purge all installed packages (mods). Deletes all files from the mods directory.
+
 Usage: creep purge
+
+Use command `creep list installed` to see the list of currently installed mods
 """
         installdir = self.minecraftdir + os.sep + 'mods'
         print("Purging all installed mods in {}...".format(installdir))
@@ -414,7 +585,7 @@ Usage: creep purge
                     print('opa')
                     continue
 
-    def createRepository(self):
+    def create_repository(self):
         self.repository = Repository(self.appdir)
         self.repository.set_minecraft_target(self.minecraft_target)
 
@@ -460,7 +631,7 @@ Usage: creep purge
 
         return home + os.sep + path
 
-    def updateVersionWithGitDescribe(self):
+    def update_version_with_git_describe(self):
         """Update the version of this client to reflect any local changes in git"""
 
         appdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
