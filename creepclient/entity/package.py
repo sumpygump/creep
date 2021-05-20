@@ -2,6 +2,8 @@
 
 import creepclient
 import os
+import urllib.request
+import urllib.error
 
 from creepclient.entity import Entity
 
@@ -25,7 +27,6 @@ class Package(Entity):
 
     def download(self, savelocation):
         """Download this package from the specified URL in the package"""
-        import urllib2
 
         url = self.get_download_location()
 
@@ -38,10 +39,10 @@ class Package(Entity):
             "Upgrade-Insecure-Requests": "1",
             "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.87 Safari/537.36",
         }
-        request = urllib2.Request(url, headers=headers)
+        request = urllib.request.Request(url, headers=headers)
         try:
-            response = urllib2.urlopen(request)
-        except urllib2.URLError as e:
+            response = urllib.request.urlopen(request)
+        except urllib.error.URLError as e:
             print("No internet connection or unable to download file. Attempted to download '" + self.get_download_location() + "'")
             return False
 
