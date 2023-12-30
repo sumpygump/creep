@@ -108,7 +108,7 @@ class CreepClient(Client, cmd.Cmd):
     def load_options(self):
         # TODO: More robust user options file handling. It should be its own
         # object to load options
-        options_path = self.appdir + os.sep + "options.json"
+        options_path = os.path.join(self.appdir, "options.json")
         if os.path.isfile(options_path):
             with open(options_path, "r", encoding="utf-8") as fd:
                 options = json.load(fd)
@@ -119,7 +119,7 @@ class CreepClient(Client, cmd.Cmd):
             self.profiledir = self.minecraftdir
 
     def save_options(self):
-        options_path = self.appdir + os.sep + "options.json"
+        options_path = os.path.join(self.appdir, "options.json")
         with open(options_path, "w", encoding="utf-8") as outfile:
             json.dump(
                 {
@@ -169,7 +169,7 @@ class CreepClient(Client, cmd.Cmd):
         pargs, _ = parser.parse_known_args(args)
 
         if pargs.installed == "installed":
-            installdir = self.profiledir + os.sep + "mods"
+            installdir = os.path.join(self.profiledir, "mods")
             self.get_packages_in_dir(
                 installdir, display_list=True, short_form=pargs.short
             )
@@ -367,12 +367,12 @@ class CreepClient(Client, cmd.Cmd):
             # Collection only has dependencies
             print(self.text_success(f"  Installed collection '{package.name}'"))
         else:
-            cachedir = self.appdir + os.sep + "cache" + os.sep + package.installdir
+            cachedir = os.path.join(self.appdir, "cache", package.installdir)
 
             if not os.path.isdir(cachedir):
                 os.mkdir(cachedir)
 
-            if not os.path.isfile(cachedir + os.sep + package.get_local_filename()):
+            if not os.path.isfile(os.path.join(cachedir, package.get_local_filename())):
                 print(
                     self.text_notify(
                         "  Downloading mod '{0}' from {1}".format(
@@ -388,7 +388,7 @@ class CreepClient(Client, cmd.Cmd):
 
             # Most of the time this is the '~/.minecraft/mods' dir, but some
             # mods have an alternate location for artifacts
-            savedir = self.profiledir + os.sep + package.installdir
+            savedir = os.path.join(self.profiledir, package.installdir)
 
             if not os.path.isdir(savedir):
                 print(self.text_notify(f"Creating directory '{savedir}'"))
@@ -400,8 +400,8 @@ class CreepClient(Client, cmd.Cmd):
                 )
 
             shutil.copyfile(
-                cachedir + os.sep + package.get_local_filename(),
-                savedir + os.sep + package.get_local_filename(),
+                os.path.join(cachedir, package.get_local_filename()),
+                os.path.join(savedir, package.get_local_filename()),
             )
 
             print(
@@ -483,9 +483,9 @@ class CreepClient(Client, cmd.Cmd):
             print("Unknown package {}".format(args))
             return 1
 
-        savedir = self.profiledir + os.sep + package.installdir
+        savedir = os.path.join(self.profiledir, package.installdir)
 
-        os.remove(savedir + os.sep + package.get_local_filename())
+        os.remove(os.path.join(savedir, package.get_local_filename()))
         print("Removed mod '{0}' from '{1}'".format(package.name, savedir))
 
     def do_stash(self, args):
@@ -560,7 +560,7 @@ class CreepClient(Client, cmd.Cmd):
         return 0
 
     def get_stashes_dir(self):
-        return self.profiledir + os.sep + "stashes"
+        return os.path.join(self.profiledir, "stashes")
 
     def get_stashes(self):
         stashes = []
@@ -576,7 +576,7 @@ class CreepClient(Client, cmd.Cmd):
         if not os.path.isdir(stashes_dir):
             os.mkdir(stashes_dir)
 
-        stash_dir = stashes_dir + os.sep + stash_name
+        stash_dir = os.path.join(stashes_dir, stash_name)
 
         if os.path.exists(stash_dir):
             print(self.text_error(f"Stash with name {stash_name} already exists."))
@@ -585,7 +585,7 @@ class CreepClient(Client, cmd.Cmd):
             os.mkdir(stash_dir)
 
         # Collect everything from the mods dir and put it in the stash dir
-        installdir = self.profiledir + os.sep + "mods"
+        installdir = os.path.join(self.profiledir, "mods")
         packages = self.get_packages_in_dir(installdir)
 
         print("Will stash the following files into stash {}:".format(stash_name))
@@ -593,13 +593,13 @@ class CreepClient(Client, cmd.Cmd):
 
         for file in files:
             print(file)
-            from_ = installdir + os.sep + file
-            to_ = stash_dir + os.sep + file
+            from_ = os.path.join(installdir, file)
+            to_ = os.path.join(stash_dir, file)
             shutil.move(from_, to_)
 
     def stash_info(self, stash_name):
         stashes_dir = self.get_stashes_dir()
-        stash_dir = stashes_dir + os.sep + stash_name
+        stash_dir = os.path.join(stashes_dir, stash_name)
 
         if not os.path.isdir(stash_dir):
             print(self.text_error(f"No stash with name {stash_name}"))
@@ -610,14 +610,14 @@ class CreepClient(Client, cmd.Cmd):
 
     def restore_stash(self, stash_name, copy_mode=False):
         stashes_dir = self.get_stashes_dir()
-        stash_dir = stashes_dir + os.sep + stash_name
+        stash_dir = os.path.join(stashes_dir, stash_name)
 
         if not os.path.isdir(stash_dir):
             print(self.text_error(f"No stash with name {stash_name}"))
             return 1
 
         # Collect everything from the stash dir and put it in the mods install dir
-        installdir = self.profiledir + os.sep + "mods"
+        installdir = os.path.join(self.profiledir, "mods")
         packages = self.get_packages_in_dir(stash_dir)
 
         files = sorted(packages.keys())
@@ -626,8 +626,8 @@ class CreepClient(Client, cmd.Cmd):
         print("{} files from stash {} to install dir.".format(verb, stash_dir))
         for file in files:
             print(file)
-            from_ = stash_dir + os.sep + file
-            to_ = installdir + os.sep + file
+            from_ = os.path.join(stash_dir, file)
+            to_ = os.path.join(installdir, file)
             if copy_mode:
                 shutil.copy(from_, to_)
             else:
@@ -646,7 +646,7 @@ class CreepClient(Client, cmd.Cmd):
 
         Use command `creep list installed` to see the list of currently installed mods
         """
-        installdir = self.profiledir + os.sep + "mods"
+        installdir = os.path.join(self.profiledir, "mods")
         print("Purging all installed mods in {}...".format(installdir))
         self.delete_path(installdir)
         print("Done.")
@@ -668,13 +668,13 @@ class CreepClient(Client, cmd.Cmd):
     def delete_path(self, rootdir):
         files = os.listdir(rootdir)
         for f in files:
-            if os.path.isdir(rootdir + os.sep + f):
-                self.delete_path(rootdir + os.sep + f)
-                os.rmdir(rootdir + os.sep + f)
+            if os.path.isdir(os.path.join(rootdir, f)):
+                self.delete_path(os.path.join(rootdir, f))
+                os.rmdir(os.path.join(rootdir, f))
             else:
                 print(self.text_error(f"Removing file {f}"))
                 try:
-                    os.remove(rootdir + os.sep + f)
+                    os.remove(os.path.join(rootdir, f))
                 except OSError:
                     print("opa")
                     continue
@@ -699,8 +699,8 @@ class CreepClient(Client, cmd.Cmd):
         if not os.path.isdir(self.appdir):
             os.mkdir(self.appdir)
 
-        if not os.path.isdir(self.appdir + os.sep + "cache"):
-            os.mkdir(self.appdir + os.sep + "cache")
+        if not os.path.isdir(os.path.join(self.appdir, "cache")):
+            os.mkdir(os.path.join(self.appdir, "cache"))
 
         # Discover the minecraft dir
         if sys.platform[:3] == "win":
@@ -710,7 +710,7 @@ class CreepClient(Client, cmd.Cmd):
                 "Library/Application Support/minecraft"
             )
         elif sys.platform == "cygwin":
-            self.minecraftdir = os.getenv("APPDATA") + os.sep + ".minecraft"
+            self.minecraftdir = os.path.join(os.getenv("APPDATA"), ".minecraft")
         else:
             self.minecraftdir = self.get_home_path(".minecraft")
 
@@ -721,8 +721,8 @@ class CreepClient(Client, cmd.Cmd):
             sys.exit(2)
 
         # Ensure the mods dir is created
-        if not os.path.isdir(self.minecraftdir + os.sep + "mods"):
-            os.mkdir(self.minecraftdir + os.sep + "mods")
+        if not os.path.isdir(os.path.join(self.minecraftdir, "mods")):
+            os.mkdir(os.path.join(self.minecraftdir, "mods"))
 
     def get_home_path(self, path=""):
         """Get the home path for this user from the OS"""
@@ -730,7 +730,7 @@ class CreepClient(Client, cmd.Cmd):
         if home is None:
             home = os.getenv("USERPROFILE")
 
-        return home + os.sep + path
+        return os.path.join(home, path)
 
     def update_version_with_git_describe(self):
         """Update the version of this client to reflect any local changes in git"""

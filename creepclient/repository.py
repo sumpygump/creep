@@ -1,8 +1,10 @@
 """Repository for packages"""
 
-import json  # JSON encoder and decoder
-import os  # Miscellaneous operating system interfaces
-import re  # Regular expressions
+import calendar
+import json
+import os
+import re
+import time
 import urllib.request
 import urllib.error
 
@@ -41,23 +43,22 @@ class Repository:
     minecraft_target = "1.16.1"
 
     def __init__(self, appdir):
-        self.localdir = appdir + os.sep + "packages.json"
+        self.localdir = os.path.join(appdir, "packages.json")
 
     def set_minecraft_target(self, target):
         self.minecraft_target = target
 
     def download_remote_repository(self):
-        print("Refreshing registry file from " + self.remote_url)
+        print(f"Refreshing registry file from {self.remote_url}")
         try:
-            response = urllib.request.urlopen(self.remote_url, None, self.timeout)
+            with urllib.request.urlopen(
+                self.remote_url, timeout=self.timeout
+            ) as response:
+                with open(self.localdir, "wb") as f:
+                    f.write(response.read())
         except urllib.error.URLError:
             return False
 
-        data = response.read()
-
-        f = open(self.localdir, "wb")
-        f.write(data)
-        f.close()
         return True
 
     def load_repository(self):
@@ -66,23 +67,23 @@ class Repository:
             if not self.download_remote_repository():
                 print("Package definition file not found or no internet connection.")
                 return {"packages": {}}
-            return json.load(open(self.localdir))
+            with open(self.localdir, encoding="utf-8") as fd:
+                return json.load(fd)
 
         # Check repository file date last modified
         # If it is older than specified time, redownload
-        import calendar
-        import time
-
         filetime = os.stat(self.localdir).st_mtime
         if filetime + self.cache_life < calendar.timegm(time.gmtime()):
             if not self.download_remote_repository():
                 print(
-                    "No internet connection. Using current version of repository. Date: {}".format(
-                        time.ctime(filetime)
-                    )
+                    (
+                        "No internet connection. Using current version of repository. "
+                        "Date: {}"
+                    ).format(time.ctime(filetime))
                 )
 
-        return json.load(open(self.localdir))
+        with open(self.localdir, encoding="utf-8") as fd:
+            return json.load(fd)
 
     def clear_cache(self):
         if os.path.isfile(self.localdir):
@@ -93,12 +94,11 @@ class Repository:
             registry = self.load_repository()
         else:
             # Assuming location is a path to an alternate file
-            registry = json.load(open(location))
+            with open(location, encoding="utf-8") as fd:
+                registry = json.load(fd)
 
-        if "repository_version" in registry:
-            self.version_hash = registry["repository_version"]
-        if "date" in registry:
-            self.version_date = registry["date"]
+        self.version_hash = registry.get("repository_version", "")
+        self.version_date = registry.get("date", "")
 
         for namekey in registry["packages"]:
             for versionkey in registry["packages"][namekey]:
@@ -182,7 +182,7 @@ class Repository:
         return cmp(self.normalize_version(version1), self.normalize_version(version2))
 
     def normalize_version(self, v):
-        return [x for x in re.sub(r"(\.0+)*$", "", v).split(".")]
+        return list(re.sub(r"(\.0+)*$", "", v).split("."))
 
     def count_packages(self):
         return len(self.packages)

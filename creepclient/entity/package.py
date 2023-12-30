@@ -1,6 +1,5 @@
 """Package entity"""
 
-import creepclient
 import os
 import urllib.request
 import urllib.error
@@ -9,7 +8,12 @@ from creepclient.entity import Entity
 
 
 class Package(Entity):
-    def __init__(self, data={}, **kwargs):
+    """Entity class representing a single package"""
+
+    def __init__(self, data=None, **kwargs):
+        if data is None:
+            data = {}
+
         self.name = ""
         self.version = ""
         self.description = ""
@@ -23,7 +27,7 @@ class Package(Entity):
         self.installdir = "mods"
         self.installstrategy = ""
 
-        super(Package, self).__init__(data, **kwargs)
+        super().__init__(data, **kwargs)
 
     def download(self, savelocation):
         """Download this package from the specified URL in the package"""
@@ -33,28 +37,31 @@ class Package(Entity):
         # Using these specific headers to make the request seem like a browser.
         # The old curseforge is using cloudflare to prevent bots
         headers = {
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3",
+            "Accept": (
+                "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,"
+                "image/apng,*/*;q=0.8,application/signed-exchange;v=b3"
+            ),
             "Accept-Language": "en-US,en;q=0.5",
             "Accept-Encoding": "gzip, deflate, br",
             "Upgrade-Insecure-Requests": "1",
-            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.87 Safari/537.36",
+            "User-Agent": (
+                "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) "
+                "Chrome/78.0.3904.87 Safari/537.36"
+            ),
         }
         request = urllib.request.Request(url, headers=headers)
         try:
-            response = urllib.request.urlopen(request)
-        except urllib.error.URLError as e:
+            with urllib.request.urlopen(request) as response:
+                path = os.path.join(savelocation, self.get_local_filename())
+                with open(path, "wb") as f:
+                    f.write(response.read())
+        except urllib.error.URLError:
             print(
-                "No internet connection or unable to download file. Attempted to download '"
-                + self.get_download_location()
-                + "'"
+                "No internet connection or unable to download file. "
+                f"Attempted to download '{url}'"
             )
             return False
-
-        data = response.read()
-
-        f = open(savelocation + os.sep + self.get_local_filename(), "wb")
-        f.write(data)
-        f.close()
 
         return True
 
@@ -64,9 +71,7 @@ class Package(Entity):
             return self.url
 
         # Backup location in case no url is provided for direct download
-        url = "http://quantalideas.com/creep/packages/" + self.filename
-
-        return url
+        return f"http://quantalideas.com/creep/packages/{self.filename}"
 
     def get_local_filename(self):
         """Get the local canonical filename made up of entity attributes"""
@@ -92,4 +97,5 @@ class Package(Entity):
 
     def __str__(self):
         """Convert this object to a string"""
-        return "{0} ({1}) - {2}".format(self.name, self.version, self.description)
+        # return "{0} ({1}) - {2}".format(self.name, self.version, self.description)
+        return "{0} ({1})".format(self.name, self.version)

@@ -2,7 +2,14 @@
 
 
 class Entity(object):
-    def __init__(self, data={}, **kwargs):
+    """Base Entity model"""
+
+    def __init__(self, data=None, **kwargs):
+        """Initialize this object"""
+
+        if data is None:
+            data = {}
+
         if len(data) > 0:
             for key, value in data.iteritems():
                 setattr(self, key, value)
@@ -10,6 +17,3 @@ class Entity(object):
         if len(kwargs) > 0:
             for key, value in kwargs.iteritems():
                 setattr(self, key, value)
-
-
-# from creepclient.entity.package import Package
