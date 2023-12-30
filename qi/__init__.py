@@ -1,8 +1,8 @@
-# -*- coding: UTF-8 -*-
-# Copyright © 2012 Quantal Ideas
-# Qi Python library
+"""QI Python library"""
 
-__version__ = "1.1"
+# Copyright © 2012,2023 Quantal Ideas
+
+__version__ = "2.0"
 __author__ = "Jansen Price"
 
 from qi.columnar import Columnar

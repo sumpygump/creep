@@ -70,18 +70,16 @@ class Package(Entity):
 
     def get_local_filename(self):
         """Get the local canonical filename made up of entity attributes"""
+
         if self.installdir != "mods":
             # For non-regular mods use the orig filename
             return self.filename
 
-        filename, extension = os.path.splitext(self.filename)
+        _, extension = os.path.splitext(self.filename)
 
-        # vendor_name_version.extension
-        return (
-            self.name.replace("/", "_")
-            + "_"
-            + self.version.replace(" ", "-")
-            + extension
+        # Format is 'vendor_name_version.extension'
+        return "{}_{}{}".format(
+            self.name.replace("/", "_"), self.version.replace(" ", "-"), extension
         )
 
     def get_minecraft_version(self):

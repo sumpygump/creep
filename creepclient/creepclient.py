@@ -2,7 +2,6 @@
 
 import argparse
 import cmd  # Command interpreter logic. Gives us the base class for the client
-import distutils.dir_util  # Directory utilities
 import inspect  # Functions to inspect live objects
 import json  # JSON encoder and decoder
 import os  # Miscellaneous operating system interfaces
@@ -11,6 +10,7 @@ import shutil  # High-level file operations
 import subprocess  # Spawn subprocesses, connect in/out pipes, obtain return codes
 import sys  # System specific parameters and functions
 import tempfile  # Temporary file utilities
+import textwrap
 import zipfile  # Zip file utilities
 
 from qi.console.client import Client
@@ -24,7 +24,7 @@ class CreepClient(Client, cmd.Cmd):
     """Creep Mod Package Manager Client"""
 
     # Version of this client
-    VERSION = "1.1"
+    version = "1.1"
 
     # Absolute path where this client is installed
     installdir = ""
@@ -55,9 +55,31 @@ class CreepClient(Client, cmd.Cmd):
 
         self.create_repository()
 
-    def do_version(self, args):
+    def __getattr__(self, name):
+        """Special method called when attempting to check for an attr of this class"""
+
+        if name.startswith("help_"):
+            # Special logic to dedent the auto 'help text' provided in the do_*
+            # methods' docstrings, which have indentation since it is
+            # normalized in the source code, but I don't want the indentation
+            # in the help output.
+            command = name.replace("help_", "")
+            doc = getattr(self, "do_" + command).__doc__
+            if doc:
+                # Return a lambda because cmd's do_help will call this return
+                # value as a function.  I put the 8 spaces in front of the
+                # docstring so dedent knows that is the indentation level I
+                # want to dedent from.
+                return lambda: print(
+                    textwrap.dedent("{}{}".format(" " * 8, doc.rstrip()))
+                )
+
+        # Sorry this attribute doesn't exist
+        raise AttributeError()
+
+    def do_version(self, args):  # pylint: disable=unused-argument
         """Display creep version"""
-        print(self.colortext("Creep v{}".format(self.VERSION), self.terminal.C_GREEN))
+        print(self.colortext("Creep v{}".format(self.version), self.terminal.C_GREEN))
         self.display_target()
         self.display_profile()
 
@@ -68,8 +90,10 @@ class CreepClient(Client, cmd.Cmd):
         Examples:
           creep target 1.16.5
              Set the version of minecraft for mods"""
+
         if len(args) > 0:
-            # TODO: Validate against ~/.minecraft/launcher_profiles.json for valid versions to use
+            # TODO: Validate against ~/.minecraft/launcher_profiles.json for
+            # valid versions to use
             self.minecraft_target = args
 
         self.display_target()
@@ -85,19 +109,21 @@ class CreepClient(Client, cmd.Cmd):
         )
 
     def load_options(self):
-        # TODO: More robust user options file handling. It should be its own object to load options
+        # TODO: More robust user options file handling. It should be its own
+        # object to load options
         options_path = self.appdir + os.sep + "options.json"
         if os.path.isfile(options_path):
-            options = json.load(open(options_path))
-            self.minecraft_target = options.get("minecraft_target", DEFAULT_TARGET)
-            self.profiledir = options.get("profile_dir", self.minecraftdir)
+            with open(options_path, "r", encoding="utf-8") as fd:
+                options = json.load(fd)
+                self.minecraft_target = options.get("minecraft_target", DEFAULT_TARGET)
+                self.profiledir = options.get("profile_dir", self.minecraftdir)
         else:
             self.minecraft_target = DEFAULT_TARGET
             self.profiledir = self.minecraftdir
 
     def save_options(self):
         options_path = self.appdir + os.sep + "options.json"
-        with open(options_path, "w") as outfile:
+        with open(options_path, "w", encoding="utf-8") as outfile:
             json.dump(
                 {
                     "minecraft_target": self.minecraft_target,
@@ -259,6 +285,7 @@ class CreepClient(Client, cmd.Cmd):
         print("Package Type: " + package.type)
         print("Keywords: " + package.keywords)
         print("Homepage: " + package.homepage)
+        print("Local filename: " + package.get_local_filename())
         print("Dependencies: ")
         for key, value in package.require.items():
             print(" - " + key + ": " + value)
@@ -298,7 +325,7 @@ class CreepClient(Client, cmd.Cmd):
         self.print_package_details(package)
 
     def do_install(self, args):
-        """Install a package (mod). This will install a given mod and its dependencies too
+        """Install a package (mod). This will install a given mod and its dependencies
 
         Usage: creep install [options] (<packagename>|-l <filename>)
           -n, --no-dependencies        Do not install dependencies automatically
@@ -310,7 +337,7 @@ class CreepClient(Client, cmd.Cmd):
           * package:version
           * vendor/package:version
 
-        Creep only considers packages that are in the current targeted minecraft version.
+        Creep only considers packages in the current targeted minecraft version.
           See `creep help target` for details.
 
         Examples: creep install just-enough-items
@@ -329,7 +356,7 @@ class CreepClient(Client, cmd.Cmd):
         parser.add_argument("-n", "--no-dependencies", action="store_true")
         parser.add_argument("-l", "--listfile", help="Install packages from file")
 
-        (pargs, remaining_args) = parser.parse_known_args(args)
+        (pargs, _) = parser.parse_known_args(args)
 
         if pargs.no_dependencies:
             print(
@@ -368,7 +395,7 @@ class CreepClient(Client, cmd.Cmd):
         # Install any required packages
         # Warning: does not handle versions or circular dependencies
         for dependency in package.require:
-            if dependency == "minecraft" or dependency == "forge":
+            if dependency in ("minecraft", "forge"):
                 continue
             if self.install_dependencies:
                 print(
@@ -409,13 +436,14 @@ class CreepClient(Client, cmd.Cmd):
                         self.terminal.C_YELLOW,
                     )
                 )
-                downloadResult = package.download(cachedir)
+                download_result = package.download(cachedir)
 
-                if not downloadResult:
+                if not download_result:
                     print("Download failed.")
                     return False
 
-            # Most of the time this is the '~/.minecraft/mods' dir, but some mods have an alternate location for artifacts
+            # Most of the time this is the '~/.minecraft/mods' dir, but some
+            # mods have an alternate location for artifacts
             savedir = self.profiledir + os.sep + package.installdir
 
             if not os.path.isdir(savedir):
@@ -453,12 +481,24 @@ class CreepClient(Client, cmd.Cmd):
             return 1
 
         # Read file and attempt to parse each line as a package name
-        with open(listfile) as fp:
+        with open(listfile, encoding="utf-8") as fp:
             for line in fp:
                 args = line.split()
                 self.install_package(args[0])
 
     def install_with_strategy(self, installstrategy, package, cachedir, savedir):
+        """Install a mod with a set of strategy directives
+
+        Intended use case for this is a mod that is a zip file of mods and the
+        jar files are in a subdirectory in the zip archive.
+
+        Example strategy: `unzip; move 'mods/*'`
+          This tells creep to unzip the archive and then move all the mods from
+          the 'mods' directory into the target save location"""
+
+        if not installstrategy:
+            return None
+
         print("Installing with strategy: " + installstrategy)
 
         if ";" in installstrategy:
@@ -466,8 +506,8 @@ class CreepClient(Client, cmd.Cmd):
         else:
             strategies = [installstrategy]
 
-        # set up a temppath where we will work
-        tmppath = tempfile.gettempdir() + os.sep + package.name.replace("/", "_")
+        # Set up a temppath where we will work
+        tmppath = os.path.join(tempfile.gettempdir(), package.name.replace("/", "_"))
         if os.path.exists(tmppath):
             shutil.rmtree(tmppath)
         os.mkdir(tmppath)
@@ -475,21 +515,23 @@ class CreepClient(Client, cmd.Cmd):
         for strategy in strategies:
             args = shlex.split(strategy)
             if args[0] == "unzip":
-                print(
-                    "Unzipping archive: "
-                    + cachedir
-                    + os.sep
-                    + package.get_local_filename()
-                )
-                self.unzip(cachedir + os.sep + package.get_local_filename(), tmppath)
+                # 'unzip' will unzip the given package's local filename into temp dir
+                filename = os.path.join(cachedir, package.get_local_filename())
+                print(f"Unzipping archive: {filename}")
+                self.unzip(filename, tmppath)
             elif args[0] == "move":
-                print("Moving files: " + args[1])
+                # 'move <arg>' will move files from the temp dir into the save dir
                 path = args[1]
+                print(f"Moving files: {path}")
                 if path[-2:] == "/*":
                     path = path.replace("/*", "")
-                    distutils.dir_util.copy_tree(tmppath + os.sep + path, savedir)
-                else:
-                    shutil.copytree(tmppath + os.sep + path, savedir)
+                shutil.copytree(
+                    os.path.join(tmppath, path), savedir, dirs_exist_ok=True
+                )
+
+        # Clean up
+        shutil.rmtree(tmppath)
+        return True
 
     def do_uninstall(self, args):
         """Uninstall a package (mod)
@@ -513,13 +555,13 @@ class CreepClient(Client, cmd.Cmd):
                creep stash list
 
         Subcommands:
-         - save <stash-name> : Saves the currently installed mods into a stash with given name
-                and empties the install directory.
+         - save <stash-name> : Saves the currently installed mods into a stash
+                with given name and empties the install directory.
          - info <stash-name> : Show the mod files present in a given stash.
-         - restore <stash-name> : Installs the mods from the given stash into the install directory
-                and removes the stash.
-         - apply <stash-name> : Installs the mods from the given stash into the install directory
-                but keep the stash in tact.
+         - restore <stash-name> : Installs the mods from the given stash into
+                the install directory and removes the stash.
+         - apply <stash-name> : Installs the mods from the given stash into the
+                install directory but keep the stash in tact.
          - list : List the currently available stashes.
 
         Examples: creep stash save my-world
@@ -544,7 +586,7 @@ class CreepClient(Client, cmd.Cmd):
         parser.add_argument("subcommand")
         parser.add_argument("stash_name", nargs="?")
 
-        (pargs, remaining_args) = parser.parse_known_args(args)
+        (pargs, _) = parser.parse_known_args(args)
 
         if pargs.subcommand == "list":
             return self.list_stashes()
@@ -573,7 +615,7 @@ class CreepClient(Client, cmd.Cmd):
         if pargs.subcommand == "info":
             return self.stash_info(pargs.stash_name)
 
-        if pargs.subcommand == "restore" or pargs.subcommand == "pop":
+        if pargs.subcommand in ("restore", "pop"):
             return self.restore_stash(pargs.stash_name)
 
         if pargs.subcommand == "apply":
@@ -687,18 +729,20 @@ class CreepClient(Client, cmd.Cmd):
             print("Deleting stash dir {}".format(stash_name))
             shutil.rmtree(stash_dir)
 
-    def do_purge(self, args):
-        """Purge all installed packages (mods). Deletes all files from the mods directory.
+    def do_purge(self, args):  # pylint: disable=unused-argument
+        """Purge all installed packages (mods). Deletes all files from the mods
+        directory.
 
         Usage: creep purge
 
-        Use command `creep list installed` to see the list of currently installed mods"""
+        Use command `creep list installed` to see the list of currently installed mods
+        """
         installdir = self.profiledir + os.sep + "mods"
         print("Purging all installed mods in {}...".format(installdir))
         self.delete_path(installdir)
         print("Done.")
 
-    def do_refresh(self, args):
+    def do_refresh(self, args):  # pylint: disable=unused-argument
         """Force an refresh of the package repository"""
 
         self.repository.clear_cache()
@@ -732,45 +776,50 @@ class CreepClient(Client, cmd.Cmd):
         self.repository.set_minecraft_target(self.minecraft_target)
 
         # Check if local packages repository exists and load it too
-        if os.path.isfile(self.appdir + os.sep + "local-packages.json"):
+        local_packages_filename = os.path.join(self.appdir, "local-packages.json")
+        if os.path.isfile(local_packages_filename):
             self.repository.populate("", False)
-            self.repository.populate(self.appdir + os.sep + "local-packages.json")
+            self.repository.populate(local_packages_filename)
         else:
             self.repository.populate("", True)
 
     def update_paths(self):
-        # self.installdir = os.path.dirname(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))))
+        """Set configured paths utilized by creep client"""
 
-        self.appdir = self.getHomePath(".creep")
+        # Creep app dir
+        self.appdir = self.get_home_path(".creep")
         if not os.path.isdir(self.appdir):
             os.mkdir(self.appdir)
 
         if not os.path.isdir(self.appdir + os.sep + "cache"):
             os.mkdir(self.appdir + os.sep + "cache")
 
+        # Discover the minecraft dir
         if sys.platform[:3] == "win":
-            self.minecraftdir = self.getHomePath("AppData\\Roaming\\.minecraft")
+            self.minecraftdir = self.get_home_path("AppData\\Roaming\\.minecraft")
         elif sys.platform == "darwin":
-            self.minecraftdir = self.getHomePath(
+            self.minecraftdir = self.get_home_path(
                 "Library/Application Support/minecraft"
             )
         elif sys.platform == "cygwin":
             self.minecraftdir = os.getenv("APPDATA") + os.sep + ".minecraft"
         else:
-            self.minecraftdir = self.getHomePath(".minecraft")
+            self.minecraftdir = self.get_home_path(".minecraft")
 
+        # Ensure minecraft dir is found
         if not os.path.isdir(self.minecraftdir):
             print("Minecraft dir not found ({})".format(self.minecraftdir))
             print("Is Minecraft installed?")
             sys.exit(2)
 
+        # Ensure the mods dir is created
         if not os.path.isdir(self.minecraftdir + os.sep + "mods"):
             os.mkdir(self.minecraftdir + os.sep + "mods")
 
-    def getHomePath(self, path=""):
+    def get_home_path(self, path=""):
         """Get the home path for this user from the OS"""
         home = os.getenv("HOME")
-        if home == None:
+        if home is None:
             home = os.getenv("USERPROFILE")
 
         return home + os.sep + path
@@ -783,7 +832,7 @@ class CreepClient(Client, cmd.Cmd):
         )
 
         try:
-            self.VERSION = (
+            self.version = (
                 subprocess.check_output(
                     ["git", "-C", appdir, "describe"], stderr=subprocess.STDOUT
                 )
@@ -793,11 +842,10 @@ class CreepClient(Client, cmd.Cmd):
         except OSError:
             pass
         except subprocess.CalledProcessError:
-            # Oh well, we tried, just use the VERSION as it was
+            # Oh well, we tried, just use the version as it was
             pass
 
     def colortext(self, text, forecolor=None, backcolor=None, isbold=None):
-
         if forecolor is None and backcolor is None and isbold is None:
             return text
 

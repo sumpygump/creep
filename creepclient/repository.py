@@ -14,7 +14,7 @@ def cmp(a, b):
     return (a > b) - (a < b)
 
 
-class Repository(object):
+class Repository:
     """Repository class"""
 
     remote_url = "http://quantalideas.com/mcpackages/packages.json"
@@ -225,7 +225,7 @@ class Repository(object):
     def search(self, term):
         results = []
         for package in self.unique_packages:
-            if term in re.split("\W?", package.name):
+            if term in re.split(r"\W?", package.name):
                 results.append(package)
                 continue
             if term in package.description.split():
