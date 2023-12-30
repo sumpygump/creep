@@ -2,7 +2,7 @@
 # -*- coding: UTF-8 -*-
 
 import argparse
-import sys # System specific parameters and functions
+import sys  # System specific parameters and functions
 
 
 from creepclient.creepclient import CreepClient
@@ -12,8 +12,8 @@ if __name__ == "__main__":
     terminal = Terminal()
 
     parser = argparse.ArgumentParser(add_help=False)
-    parser.add_argument('-v', '--version', action='store_true')
-    parser.add_argument('-r', '--repository')
+    parser.add_argument("-v", "--version", action="store_true")
+    parser.add_argument("-r", "--repository")
 
     (args, remaining_args) = parser.parse_known_args(sys.argv)
 
@@ -21,26 +21,25 @@ if __name__ == "__main__":
 
     if args.version:
         # Display version and exit
-        client.do_version('')
+        client.do_version("")
         sys.exit(0)
 
     if len(sys.argv) > 1:
         # Use the client to execute the command from argv
-        status = client.onecmd(' '.join(remaining_args[1:]))
+        status = client.onecmd(" ".join(remaining_args[1:]))
     else:
-        client.do_version('')
-        print(u"█████████████████")
-        print(u"█░░░░░░░░░░░░░░░█")
-        print(u"█░░████░░░████░░█")
-        print(u"█░░████░░░████░░█")
-        print(u"█░░░░░░███░░░░░░█")
-        print(u"█░░░░███████░░░░█")
-        print(u"█░░░░███████░░░░█")
-        print(u"█░░░░██░░░██░░░░█")
-        print(u"█░░░░░░░░░░░░░░░█")
-        print(u"█████████████████")
+        client.do_version("")
+        print("█████████████████")
+        print("█░░░░░░░░░░░░░░░█")
+        print("█░░████░░░████░░█")
+        print("█░░████░░░████░░█")
+        print("█░░░░░░███░░░░░░█")
+        print("█░░░░███████░░░░█")
+        print("█░░░░███████░░░░█")
+        print("█░░░░██░░░██░░░░█")
+        print("█░░░░░░░░░░░░░░░█")
+        print("█████████████████")
 
-        status = client.onecmd('help')
+        status = client.onecmd("help")
 
     sys.exit(status)
-

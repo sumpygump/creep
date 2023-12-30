@@ -3,8 +3,9 @@ import re
 
 def getVisibleLength(text):
     # remove ansi escape sequences (coloring!) before getting the length
-    ansi_escape = re.compile(r'(?:\x1b[^m]*m|\x0f)', re.UNICODE)
-    return len(ansi_escape.sub('', text).decode('utf-8'))
+    ansi_escape = re.compile(r"(?:\x1b[^m]*m|\x0f)", re.UNICODE)
+    return len(ansi_escape.sub("", text).decode("utf-8"))
+
 
 class Columnar(object):
     pos = 0
@@ -22,7 +23,7 @@ class Columnar(object):
     fillchars = []
     """Fillchar for each column"""
 
-    def __init__(self, data = [], headers = [], fillchars = []):
+    def __init__(self, data=[], headers=[], fillchars=[]):
         """Construct object"""
         self.widths = []
         self.data = data
@@ -31,40 +32,40 @@ class Columnar(object):
 
         self.measureColumnWidths()
 
-    def setHeaders(self, headers = []):
+    def setHeaders(self, headers=[]):
         self.headers = headers
         return self
 
-    def setFillchars(self, fillchars = []):
+    def setFillchars(self, fillchars=[]):
         if len(fillchars) == 0:
             for i in range(len(self.headers)):
                 # Default to spaces for each column
-                fillchars.append(' ')
+                fillchars.append(" ")
         self.fillchars = fillchars
         return self
 
-    def render(self, do_print = True):
+    def render(self, do_print=True):
         print(self.renderHeaders())
 
         if do_print:
             for row in self:
                 print(row)
         else:
-            output = ''
+            output = ""
             for row in self:
                 output += row.render()
             return output
 
     def renderHeaders(self):
-        out = ''
+        out = ""
 
         if len(self.headers) == 0:
             return out
 
         for i in range(len(self.widths)):
             header = self.headers[i]
-            filler = (self.widths[i] - getVisibleLength(header)) * ' '
-            out += header + filler + ' '
+            filler = (self.widths[i] - getVisibleLength(header)) * " "
+            out += header + filler + " "
 
         return out
 
@@ -103,7 +104,7 @@ class Columnar(object):
         return row
 
     def _setColumnWidth(self, col, i):
-        #length = getVisibleLength(col.encode('utf-8'))
+        # length = getVisibleLength(col.encode('utf-8'))
         length = getVisibleLength(col)
 
         try:
@@ -116,29 +117,30 @@ class Columnar(object):
         """Iterator protocol"""
         return self
 
+
 class ColumnarRow(object):
     widths = []
     data = []
     fillchars = []
 
-    def __init__(self, data = [], widths = [], fillchars = []):
+    def __init__(self, data=[], widths=[], fillchars=[]):
         self.data = data
         self.widths = widths
         self.fillchars = fillchars
 
     def render(self):
-        out = ''
+        out = ""
 
         for i in range(len(self.widths)):
             try:
                 fillchar = self.fillchars[i]
             except IndexError:
                 # Default to space if not set
-                fillchar = ' '
+                fillchar = " "
 
             data = self.data[i]
             filler = (self.widths[i] - getVisibleLength(data)) * fillchar
-            out += data + filler + ' '
+            out += data + filler + " "
 
         return out
 
@@ -149,7 +151,7 @@ class ColumnarRow(object):
         try:
             itemValue = self.data[offset]
         except:
-            return ''
+            return ""
 
         return itemValue
 

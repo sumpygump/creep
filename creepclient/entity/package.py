@@ -7,21 +7,21 @@ import urllib.error
 
 from creepclient.entity import Entity
 
-class Package(Entity):
 
-    def __init__(self, data = {}, **kwargs):
-        self.name = ''
-        self.version = ''
-        self.description = ''
-        self.keywords = ''
+class Package(Entity):
+    def __init__(self, data={}, **kwargs):
+        self.name = ""
+        self.version = ""
+        self.description = ""
+        self.keywords = ""
         self.require = {}
-        self.filename = ''
-        self.url = ''
-        self.author = ''
-        self.homepage = ''
-        self.type = 'mod'
-        self.installdir = 'mods'
-        self.installstrategy = ''
+        self.filename = ""
+        self.url = ""
+        self.author = ""
+        self.homepage = ""
+        self.type = "mod"
+        self.installdir = "mods"
+        self.installstrategy = ""
 
         super(Package, self).__init__(data, **kwargs)
 
@@ -43,12 +43,16 @@ class Package(Entity):
         try:
             response = urllib.request.urlopen(request)
         except urllib.error.URLError as e:
-            print("No internet connection or unable to download file. Attempted to download '" + self.get_download_location() + "'")
+            print(
+                "No internet connection or unable to download file. Attempted to download '"
+                + self.get_download_location()
+                + "'"
+            )
             return False
 
         data = response.read()
 
-        f = open(savelocation + os.sep + self.get_local_filename(), 'wb')
+        f = open(savelocation + os.sep + self.get_local_filename(), "wb")
         f.write(data)
         f.close()
 
@@ -60,33 +64,34 @@ class Package(Entity):
             return self.url
 
         # Backup location in case no url is provided for direct download
-        url = 'http://quantalideas.com/creep/packages/' + self.filename
+        url = "http://quantalideas.com/creep/packages/" + self.filename
 
         return url
 
     def get_local_filename(self):
         """Get the local canonical filename made up of entity attributes"""
-        if self.installdir != 'mods':
+        if self.installdir != "mods":
             # For non-regular mods use the orig filename
             return self.filename
 
         filename, extension = os.path.splitext(self.filename)
 
         # vendor_name_version.extension
-        return self.name.replace('/', '_') + '_' + self.version.replace(' ', '-') + extension
+        return (
+            self.name.replace("/", "_")
+            + "_"
+            + self.version.replace(" ", "-")
+            + extension
+        )
 
     def get_minecraft_version(self):
         """Get the minecraft version for this package"""
-        return self.require['minecraft']
+        return self.require["minecraft"]
 
     def get_simple_name(self):
         """Get the second name (without the vendor) for a package"""
-        return self.name.split('/')[1]
+        return self.name.split("/")[1]
 
     def __str__(self):
         """Convert this object to a string"""
-        return "{0} ({1}) - {2}".format(
-            self.name,
-            self.version,
-            self.description
-        )
+        return "{0} ({1}) - {2}".format(self.name, self.version, self.description)

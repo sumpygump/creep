@@ -1,3 +1,5 @@
+"""Entity module for creepclient"""
+
 
 class Entity(object):
     def __init__(self, data={}, **kwargs):
@@ -10,4 +12,5 @@ class Entity(object):
             for key, value in kwargs.iteritems():
                 setattr(self, key, value)
 
-#from creepclient.entity.package import Package
+
+# from creepclient.entity.package import Package

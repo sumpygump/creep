@@ -1,8 +1,8 @@
 """Repository for packages"""
 
-import json # JSON encoder and decoder
-import os # Miscellaneous operating system interfaces
-import re # Regular expressions
+import json  # JSON encoder and decoder
+import os  # Miscellaneous operating system interfaces
+import re  # Regular expressions
 import urllib.request
 import urllib.error
 
@@ -17,10 +17,10 @@ def cmp(a, b):
 class Repository(object):
     """Repository class"""
 
-    remote_url = 'http://quantalideas.com/mcpackages/packages.json'
-    #remote_url = 'http://creep-packages.lvh.me/packages.json'
-    version_hash = ''
-    version_date = ''
+    remote_url = "http://quantalideas.com/mcpackages/packages.json"
+    # remote_url = 'http://creep-packages.lvh.me/packages.json'
+    version_hash = ""
+    version_date = ""
 
     # Remote fetching timeout value (in seconds)
     timeout = 5
@@ -41,7 +41,7 @@ class Repository(object):
     minecraft_target = "1.16.1"
 
     def __init__(self, appdir):
-        self.localdir = appdir + os.sep + 'packages.json'
+        self.localdir = appdir + os.sep + "packages.json"
 
     def set_minecraft_target(self, target):
         self.minecraft_target = target
@@ -55,7 +55,7 @@ class Repository(object):
 
         data = response.read()
 
-        f = open(self.localdir, 'wb')
+        f = open(self.localdir, "wb")
         f.write(data)
         f.close()
         return True
@@ -65,17 +65,22 @@ class Repository(object):
         if not os.path.isfile(self.localdir):
             if not self.download_remote_repository():
                 print("Package definition file not found or no internet connection.")
-                return {'packages': {}}
+                return {"packages": {}}
             return json.load(open(self.localdir))
 
         # Check repository file date last modified
         # If it is older than specified time, redownload
         import calendar
         import time
+
         filetime = os.stat(self.localdir).st_mtime
         if filetime + self.cache_life < calendar.timegm(time.gmtime()):
             if not self.download_remote_repository():
-                print("No internet connection. Using current version of repository. Date: {}".format(time.ctime(filetime)))
+                print(
+                    "No internet connection. Using current version of repository. Date: {}".format(
+                        time.ctime(filetime)
+                    )
+                )
 
         return json.load(open(self.localdir))
 
@@ -83,36 +88,36 @@ class Repository(object):
         if os.path.isfile(self.localdir):
             os.remove(self.localdir)
 
-    def populate(self, location='', should_post_process=True):
+    def populate(self, location="", should_post_process=True):
         if not location:
             registry = self.load_repository()
         else:
             # Assuming location is a path to an alternate file
             registry = json.load(open(location))
 
-        if 'repository_version' in registry:
-            self.version_hash = registry['repository_version']
-        if 'date' in registry:
-            self.version_date = registry['date']
+        if "repository_version" in registry:
+            self.version_hash = registry["repository_version"]
+        if "date" in registry:
+            self.version_date = registry["date"]
 
-        for namekey in registry['packages']:
-            for versionkey in registry['packages'][namekey]:
-                data = registry['packages'][namekey][versionkey]
+        for namekey in registry["packages"]:
+            for versionkey in registry["packages"][namekey]:
+                data = registry["packages"][namekey][versionkey]
                 package = Package()
-                package.name = data['name']
-                package.version = data['version']
-                package.description = data['description']
-                package.keywords = data['keywords']
-                package.require = data['require']
-                package.filename = data['filename'] if 'filename' in data else ''
-                package.url = data['url'] if 'url' in data else ''
-                package.author = data['author']
-                package.homepage = data['homepage'] if 'homepage' in data else ''
-                package.type = data['type']
-                if 'installdir' in data:
-                    package.installdir = data['installdir']
-                if 'installstrategy' in data:
-                    package.installstrategy = data['installstrategy']
+                package.name = data["name"]
+                package.version = data["version"]
+                package.description = data["description"]
+                package.keywords = data["keywords"]
+                package.require = data["require"]
+                package.filename = data["filename"] if "filename" in data else ""
+                package.url = data["url"] if "url" in data else ""
+                package.author = data["author"]
+                package.homepage = data["homepage"] if "homepage" in data else ""
+                package.type = data["type"]
+                if "installdir" in data:
+                    package.installdir = data["installdir"]
+                if "installstrategy" in data:
+                    package.installstrategy = data["installstrategy"]
                 self.packages.append(package)
 
         if should_post_process:
@@ -120,13 +125,13 @@ class Repository(object):
 
     def post_populate(self):
         """Processing of packages to occur after population"""
-        self.packages.sort(key=attrgetter('name'))
+        self.packages.sort(key=attrgetter("name"))
         self.reduce_to_unique_packages()
         self.create_simple_name_index()
 
     def reduce_to_unique_packages(self):
         """Make a listing of packages with only the latest version for each one"""
-        package_dict = {};
+        package_dict = {}
         self.unique_packages = []
 
         # First make a dict of packages index by name
@@ -158,7 +163,7 @@ class Repository(object):
 
                     self.unique_packages.append(latest)
 
-        self.unique_packages.sort(key=attrgetter('name'))
+        self.unique_packages.sort(key=attrgetter("name"))
 
     def create_simple_name_index(self):
         """Make a listing of packages by the second name for simplified access
@@ -177,19 +182,21 @@ class Repository(object):
         return cmp(self.normalize_version(version1), self.normalize_version(version2))
 
     def normalize_version(self, v):
-        return [x for x in re.sub(r'(\.0+)*$','', v).split(".")]
+        return [x for x in re.sub(r"(\.0+)*$", "", v).split(".")]
 
     def count_packages(self):
         return len(self.packages)
 
     def fetch_package(self, name):
-        if name == '':
+        if name == "":
             return False
 
         if ":" in name:
-            namepart,versionpart = name.split(":")
+            namepart, versionpart = name.split(":")
             for package in self.packages:
-                if (package.name == namepart or package.get_simple_name() == namepart) and package.version == versionpart:
+                if (
+                    package.name == namepart or package.get_simple_name() == namepart
+                ) and package.version == versionpart:
                     return package
         else:
             # Only select from the latest versions (unique_packages)
@@ -200,7 +207,9 @@ class Repository(object):
             # Try to find based on the mod name (without vendor)
             if name in self.simple_name_packages:
                 if len(self.simple_name_packages[name]) > 1:
-                    print("Multiple packages exist with name '{name}'".format(name=name))
+                    print(
+                        "Multiple packages exist with name '{name}'".format(name=name)
+                    )
                     return False
                 return self.simple_name_packages[name][0]
 
@@ -216,7 +225,7 @@ class Repository(object):
     def search(self, term):
         results = []
         for package in self.unique_packages:
-            if term in re.split('\W?', package.name):
+            if term in re.split("\W?", package.name):
                 results.append(package)
                 continue
             if term in package.description.split():
@@ -233,5 +242,5 @@ class Repository(object):
                     results.append(package)
                     continue
 
-        results.sort(key=attrgetter('name'))
+        results.sort(key=attrgetter("name"))
         return results

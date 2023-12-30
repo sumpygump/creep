@@ -1,7 +1,9 @@
 import sys
 
+
 def is_a_tty(stream):
-    return hasattr(stream, 'isatty') and stream.isatty()
+    return hasattr(stream, "isatty") and stream.isatty()
+
 
 class Terminal(object):
     terminfo = None
@@ -24,11 +26,12 @@ class Terminal(object):
     # to keep things from being too familiar with right edge
     TERMINAL_WIDTH_OFFSET = 2
 
-    def __init__(self, options = {}):
-        if 'terminfo' in options:
-            self.terminfo = options['terminfo']
+    def __init__(self, options={}):
+        if "terminfo" in options:
+            self.terminfo = options["terminfo"]
         else:
             from .terminfo import Terminfo
+
             self.terminfo = Terminfo()
 
         # Set whether output is a tty
@@ -92,27 +95,23 @@ class Terminal(object):
 
         if length > size_ or "\n" in text:
             length = size_
-            text = self.wordwrap(text, size_-4)
+            text = self.wordwrap(text, size_ - 4)
             lines = text.split("\n")
-            text = ''
+            text = ""
             for line in lines:
                 line = "  " + line.strip()
                 text = text + line.ljust(size_) + newline
         else:
-            text = '  ' + text + '  ' + newline
+            text = "  " + text + "  " + newline
 
         if verticalPadding == True:
-            padding = ' ' * length
+            padding = " " * length
         else:
-            padding = ''
+            padding = ""
             end = end.strip()
             newline = end + start
 
-        out = start \
-            + padding + newline \
-            + text \
-            + padding \
-            + end
+        out = start + padding + newline + text + padding + end
 
         print(out)
 
@@ -120,7 +119,7 @@ class Terminal(object):
 
     def makeBox(self, y, x, w, h):
         # TODO: implement
-        return ''
+        return ""
 
     def startAltCharsetMode(self):
         self.printterm(chr(27) + chr(40) + chr(48))
@@ -131,17 +130,18 @@ class Terminal(object):
     def __getattr__(self, attr):
         def default_method(*args):
             if not self.isatty:
-                return ''
+                return ""
             return self.terminfo.doCapability(attr, *args)
+
         return default_method
 
-    def wordwrap(self, string, width=80, ind1=0, ind2=0, prefix=''):
-        """ word wrapping function.
-            string: the string to wrap
-            width: the column number to wrap at
-            prefix: prefix each line with this string (goes before any indentation)
-            ind1: number of characters to indent the first line
-            ind2: number of characters to indent the rest of the lines
+    def wordwrap(self, string, width=80, ind1=0, ind2=0, prefix=""):
+        """word wrapping function.
+        string: the string to wrap
+        width: the column number to wrap at
+        prefix: prefix each line with this string (goes before any indentation)
+        ind1: number of characters to indent the first line
+        ind2: number of characters to indent the rest of the lines
         """
         string = prefix + ind1 * " " + string
         newstring = ""
@@ -154,16 +154,16 @@ class Terminal(object):
             # remove line from original string and add it to the new string
             newline = string[0:marker] + "\n"
             newstring = newstring + newline
-            string = prefix + ind2 * " " + string[marker + 1:]
+            string = prefix + ind2 * " " + string[marker + 1 :]
 
         return newstring + string
 
     def wordwrapDescription(self, string, width=80, indent=0):
-        """ word wrapping function that uses all of the available space
-            for the last column
-            string: the string to wrap
-            width: the column number to wrap at
-            indent: number of characters to indent the second line on
+        """word wrapping function that uses all of the available space
+        for the last column
+        string: the string to wrap
+        width: the column number to wrap at
+        indent: number of characters to indent the second line on
         """
 
         if width < 35:
@@ -183,14 +183,14 @@ class Terminal(object):
                     return string
 
             # remove line from original string and add it to the new string
-            newline = string[0:marker] + '\n'
-            if newstring != '':
-                newstring += indent * ' '
+            newline = string[0:marker] + "\n"
+            if newstring != "":
+                newstring += indent * " "
             newstring += newline
-            string = string[marker + 1:]
+            string = string[marker + 1 :]
 
-        if newstring != '':
-            newstring += indent * ' '
+        if newstring != "":
+            newstring += indent * " "
 
         return newstring + string
 
@@ -198,10 +198,12 @@ class Terminal(object):
         def ioctl_GWINSZ(fd):
             try:
                 import fcntl, termios, struct, os
-                cr = struct.unpack('hh', fcntl.ioctl(fd, termios.TIOCGWINSZ, '1234'))
+
+                cr = struct.unpack("hh", fcntl.ioctl(fd, termios.TIOCGWINSZ, "1234"))
             except:
                 return None
             return cr
+
         cr = ioctl_GWINSZ(0) or ioctl_GWINSZ(1) or ioctl_GWINSZ(2)
         if not cr:
             try:
@@ -212,8 +214,7 @@ class Terminal(object):
                 pass
         if not cr:
             try:
-                cr = (env['LINES'], env['COLUMNS'])
+                cr = (env["LINES"], env["COLUMNS"])
             except:
                 cr = (25, 80)
         return int(cr[1]), int(cr[0])
-

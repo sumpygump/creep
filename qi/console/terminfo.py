@@ -3,12 +3,14 @@ class Terminfo(object):
 
     def __init__(self):
         # curses isn't available on all platforms
-        try: import curses
+        try:
+            import curses
         except:
             self.hasTerminfoDb = False
             return
 
-        try: curses.setupterm()
+        try:
+            curses.setupterm()
         except:
             self.hasTerminfoDb = False
             return
@@ -16,6 +18,7 @@ class Terminfo(object):
     def __getattr__(self, attr):
         def default_method(*args):
             return self.doCapability(attr, *args)
+
         return default_method
 
     def hasCapability(self, capName):
@@ -23,20 +26,22 @@ class Terminfo(object):
             return False
 
         import curses
+
         result = curses.tigetstr(capName)
         return result != None
 
     def doCapability(self, capName, *args):
         if not self.hasTerminfoDb:
-            return ''
+            return ""
 
         # TODO: this doesn't handle all caps properly
         # It only accepts 1 or 2 args and they must be ints
         import curses
+
         cap = curses.tigetstr(capName)
 
         if cap == None:
-            return ''
+            return ""
 
         # Sorry I don't know python well enough yet
         if len(args) > 1:
