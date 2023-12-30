@@ -34,7 +34,7 @@ def test_client_display_warning(capsys):
 
 def test_client_display_error():
     mock_terminal = mock.MagicMock()
-    mock_terminal.prettyMessage.return_value = "Woo hoo"
+    mock_terminal.pretty_message.return_value = "Woo hoo"
     client = Client(terminal=mock_terminal)
 
     result = client.display_error("It broke")

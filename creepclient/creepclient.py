@@ -79,7 +79,7 @@ class CreepClient(Client, cmd.Cmd):
 
     def do_version(self, args):  # pylint: disable=unused-argument
         """Display creep version"""
-        print(self.colortext("Creep v{}".format(self.version), self.terminal.C_GREEN))
+        print(self.text_success(f"Creep v{self.version}"))
         self.display_target()
         self.display_profile()
 
@@ -102,10 +102,7 @@ class CreepClient(Client, cmd.Cmd):
 
     def display_target(self):
         print(
-            self.colortext(
-                "Targetting minecraft version {}".format(self.minecraft_target),
-                self.terminal.C_GREEN,
-            )
+            self.text_success(f"Targetting minecraft version {self.minecraft_target}")
         )
 
     def load_options(self):
@@ -143,12 +140,7 @@ class CreepClient(Client, cmd.Cmd):
             new_profile_dir = args.rstrip("/")
 
             if new_profile_dir == "" or not os.path.isdir(new_profile_dir):
-                print(
-                    self.colortext(
-                        "Invalid directory '{}'".format(new_profile_dir),
-                        self.terminal.C_RED,
-                    )
-                )
+                print(self.text_error(f"Invalid directory '{new_profile_dir}'"))
             else:
                 self.profiledir = new_profile_dir
 
@@ -156,11 +148,7 @@ class CreepClient(Client, cmd.Cmd):
         self.save_options()
 
     def display_profile(self):
-        print(
-            self.colortext(
-                "Profile path '{}'".format(self.profiledir), self.terminal.C_GREEN
-            )
-        )
+        print(self.text_success(f"Profile path '{self.profiledir}'"))
 
     def do_list(self, args):
         """List packages (mods)
@@ -202,11 +190,7 @@ class CreepClient(Client, cmd.Cmd):
 
         if not files:
             if display_list:
-                print(
-                    self.colortext(
-                        "Looking in {}".format(dir_name), self.terminal.C_YELLOW
-                    )
-                )
+                print(self.text_notify(f"Looking in {dir_name}"))
                 print("No mods installed")
             return False
 
@@ -228,17 +212,12 @@ class CreepClient(Client, cmd.Cmd):
 
         if display_list:
             if not short_form:
-                print(
-                    self.colortext(
-                        "Installed mods (in {}):".format(dir_name),
-                        self.terminal.C_YELLOW,
-                    )
-                )
+                print(self.text_notify(f"Installed mods (in {dir_name}):"))
             for package in packages:
                 self.print_package(package, short_form=short_form)
             if include_unknowns:
                 for name in unknownfiles:
-                    print(self.colortext(name, self.terminal.C_RED))
+                    print(self.text_error(name))
 
         return library
 
@@ -253,22 +232,18 @@ class CreepClient(Client, cmd.Cmd):
         if short_form:
             message = "{name}:{version}".format(
                 name=package.name,
-                version=self.colortext(package.version, self.terminal.C_YELLOW),
+                version=self.text_notify(package.version),
             )
         else:
             message = "{name}:{version} - {description} [{mcversion}]".format(
                 name=package.name,
-                version=self.colortext(package.version, self.terminal.C_YELLOW),
-                description=self.colortext(
-                    package.description, self.terminal.C_MAGENTA
-                ),
-                mcversion=self.colortext(
-                    package.get_minecraft_version(), self.terminal.C_YELLOW
-                ),
+                version=self.text_notify(package.version),
+                description=self.text_info_desc(package.description),
+                mcversion=self.text_notify(package.get_minecraft_version()),
             )
 
         if package.type == "collection":
-            message = message + self.colortext(" [collection]", self.terminal.C_CYAN)
+            message = "{} {}".format(message, self.text_info_alt("[collection]"))
 
         try:
             print(message)
@@ -312,14 +287,12 @@ class CreepClient(Client, cmd.Cmd):
 
         Example: creep info slimeknights/tinkers-construct"""
         if len(args) == 0:
-            print(self.colortext("Missing argument", self.terminal.C_RED))
+            print(self.text_error("Missing argument"))
             return 1
 
         package = self.repository.fetch_package(args)
         if not package:
-            print(
-                self.colortext("Unknown package '{}'".format(args), self.terminal.C_RED)
-            )
+            print(self.text_error(f"Unknown package '{args}'"))
             return 1
 
         self.print_package_details(package)
@@ -348,7 +321,7 @@ class CreepClient(Client, cmd.Cmd):
         args = shlex.split(args)
 
         if len(args) == 0:
-            print(self.colortext("Missing argument", self.terminal.C_RED))
+            print(self.text_error("Missing argument"))
             return 1
 
         parser = argparse.ArgumentParser(add_help=False, prog="creep install")
@@ -359,12 +332,7 @@ class CreepClient(Client, cmd.Cmd):
         (pargs, _) = parser.parse_known_args(args)
 
         if pargs.no_dependencies:
-            print(
-                self.colortext(
-                    "Performing install and skipping dependencies\n",
-                    self.terminal.C_YELLOW,
-                )
-            )
+            print(self.text_notify("Performing install and skipping dependencies\n"))
             self.install_dependencies = False
 
         if pargs.packages:
@@ -379,18 +347,10 @@ class CreepClient(Client, cmd.Cmd):
     def install_package(self, packagename):
         package = self.repository.fetch_package(packagename)
         if not package:
-            print(
-                self.colortext(
-                    "Unknown package '{}'".format(packagename), self.terminal.C_RED
-                )
-            )
+            print(self.text_error(f"Unknown package '{packagename}'"))
             return 1
 
-        print(
-            self.colortext(
-                "Installing package {}".format(package), self.terminal.C_BLUE
-            )
-        )
+        print(self.text_info(f"Installing package {package}"))
 
         # Install any required packages
         # Warning: does not handle versions or circular dependencies
@@ -398,29 +358,14 @@ class CreepClient(Client, cmd.Cmd):
             if dependency in ("minecraft", "forge"):
                 continue
             if self.install_dependencies:
-                print(
-                    self.colortext(
-                        "Installing dependency '{}'".format(dependency),
-                        self.terminal.C_CYAN,
-                    )
-                )
+                print(self.text_info_alt(f"Installing dependency '{dependency}'"))
                 self.install_package(dependency)
             else:
-                print(
-                    self.colortext(
-                        "Skipping dependency '{}'".format(dependency),
-                        self.terminal.C_YELLOW,
-                    )
-                )
+                print(self.text_notify(f"Skipping dependency '{dependency}'"))
 
         if package.type == "collection":
             # Collection only has dependencies
-            print(
-                self.colortext(
-                    "  Installed collection '{0}'".format(package.name),
-                    self.terminal.C_GREEN,
-                )
-            )
+            print(self.text_success(f"  Installed collection '{package.name}'"))
         else:
             cachedir = self.appdir + os.sep + "cache" + os.sep + package.installdir
 
@@ -429,17 +374,16 @@ class CreepClient(Client, cmd.Cmd):
 
             if not os.path.isfile(cachedir + os.sep + package.get_local_filename()):
                 print(
-                    self.colortext(
+                    self.text_notify(
                         "  Downloading mod '{0}' from {1}".format(
                             package.name, package.get_download_location()
                         ),
-                        self.terminal.C_YELLOW,
                     )
                 )
                 download_result = package.download(cachedir)
 
                 if not download_result:
-                    print("Download failed.")
+                    print(self.text_error("Download failed."))
                     return False
 
             # Most of the time this is the '~/.minecraft/mods' dir, but some
@@ -447,7 +391,7 @@ class CreepClient(Client, cmd.Cmd):
             savedir = self.profiledir + os.sep + package.installdir
 
             if not os.path.isdir(savedir):
-                print(self.colortext("Creating directory '{0}'".format(savedir)))
+                print(self.text_notify(f"Creating directory '{savedir}'"))
                 os.mkdir(savedir)
 
             if package.installstrategy:
@@ -461,11 +405,11 @@ class CreepClient(Client, cmd.Cmd):
             )
 
             print(
-                self.colortext(
-                    "  Installed mod '{0}' in '{1}'".format(
-                        package.name, savedir + os.sep + package.get_local_filename()
+                self.text_success(
+                    "  Installed mod '{}' in '{}'".format(
+                        package.name,
+                        os.path.join(savedir, package.get_local_filename()),
                     ),
-                    self.terminal.C_GREEN,
                 )
             )
 
@@ -473,11 +417,7 @@ class CreepClient(Client, cmd.Cmd):
         print("Reading packages from file '{}'...".format(listfile))
 
         if not os.path.isfile(listfile):
-            print(
-                self.colortext(
-                    "File '{}' not found".format(listfile), self.terminal.C_RED
-                )
-            )
+            print(self.text_error(f"File '{listfile}' not found."))
             return 1
 
         # Read file and attempt to parse each line as a package name
@@ -575,11 +515,7 @@ class CreepClient(Client, cmd.Cmd):
         args = shlex.split(args)
 
         if len(args) == 0:
-            print(
-                self.colortext(
-                    "Stash: Missing argument <subcommand>", self.terminal.C_RED
-                )
-            )
+            print(self.text_error("Stash: Missing argument <subcommand>"))
             return 1
 
         parser = argparse.ArgumentParser(add_help=False, prog="creep stash")
@@ -592,21 +528,12 @@ class CreepClient(Client, cmd.Cmd):
             return self.list_stashes()
 
         if pargs.subcommand not in ["save", "restore", "info", "pop", "apply"]:
-            print(
-                self.colortext(
-                    "Stash: Invalid subcommand {}".format(pargs.subcommand),
-                    self.terminal.C_RED,
-                )
-            )
+            print(self.text_error(f"Stash: Invalid subcommand {pargs.subcommand}"))
             return 1
 
         # The remaining subcommands require a stash name arg
         if not pargs.stash_name:
-            print(
-                self.colortext(
-                    "Stash: Missing argument <stash_name>", self.terminal.C_RED
-                )
-            )
+            print(self.text_error("Stash: Missing argument <stash_name>"))
             return 1
 
         if pargs.subcommand == "save":
@@ -624,12 +551,7 @@ class CreepClient(Client, cmd.Cmd):
     def list_stashes(self):
         stashes = self.get_stashes()
         if not stashes:
-            print(
-                self.colortext(
-                    "Looking in {}".format(self.get_stashes_dir()),
-                    self.terminal.C_YELLOW,
-                )
-            )
+            print(self.text_notify("Looking in {}".format(self.get_stashes_dir())))
             print("No stashes")
 
         for file in stashes:
@@ -657,12 +579,7 @@ class CreepClient(Client, cmd.Cmd):
         stash_dir = stashes_dir + os.sep + stash_name
 
         if os.path.exists(stash_dir):
-            print(
-                self.colortext(
-                    "Stash with name {} already exists.".format(stash_name),
-                    self.terminal.C_RED,
-                )
-            )
+            print(self.text_error(f"Stash with name {stash_name} already exists."))
             return 1
         else:
             os.mkdir(stash_dir)
@@ -685,11 +602,7 @@ class CreepClient(Client, cmd.Cmd):
         stash_dir = stashes_dir + os.sep + stash_name
 
         if not os.path.isdir(stash_dir):
-            print(
-                self.colortext(
-                    "No stash with name {}".format(stash_name), self.terminal.C_RED
-                )
-            )
+            print(self.text_error(f"No stash with name {stash_name}"))
             return 1
 
         self.get_packages_in_dir(stash_dir, display_list=True, include_unknowns=True)
@@ -700,11 +613,7 @@ class CreepClient(Client, cmd.Cmd):
         stash_dir = stashes_dir + os.sep + stash_name
 
         if not os.path.isdir(stash_dir):
-            print(
-                self.colortext(
-                    "No stash with name {}".format(stash_name), self.terminal.C_RED
-                )
-            )
+            print(self.text_error(f"No stash with name {stash_name}"))
             return 1
 
         # Collect everything from the stash dir and put it in the mods install dir
@@ -748,11 +657,10 @@ class CreepClient(Client, cmd.Cmd):
         self.repository.clear_cache()
         self.repository.populate()
         print(
-            self.colortext(
+            self.text_success(
                 "Repository updated to version {} ({}).".format(
                     self.repository.version_hash, self.repository.version_date
                 ),
-                self.terminal.C_GREEN,
             )
         )
         print("Count: {} packages.".format(self.repository.count_packages()))
@@ -764,7 +672,7 @@ class CreepClient(Client, cmd.Cmd):
                 self.delete_path(rootdir + os.sep + f)
                 os.rmdir(rootdir + os.sep + f)
             else:
-                print(self.colortext("Removing file {}".format(f), self.terminal.C_RED))
+                print(self.text_error(f"Removing file {f}"))
                 try:
                     os.remove(rootdir + os.sep + f)
                 except OSError:
@@ -844,37 +752,6 @@ class CreepClient(Client, cmd.Cmd):
         except subprocess.CalledProcessError:
             # Oh well, we tried, just use the version as it was
             pass
-
-    def colortext(self, text, forecolor=None, backcolor=None, isbold=None):
-        if forecolor is None and backcolor is None and isbold is None:
-            return text
-
-        if isbold:
-            boldstart = self.terminal.bold()
-            boldend = self.terminal.sgr0()
-        else:
-            boldstart = ""
-            boldend = ""
-
-        return "{bold}{start}{text}{end}{unbold}".format(
-            bold=boldstart,
-            start=self.colorstart(forecolor, backcolor),
-            text=text,
-            end=self.colorend(),
-            unbold=boldend,
-        )
-
-    def colorstart(self, forecolor=None, backcolor=None):
-        coloring = ""
-        if forecolor is not None:
-            coloring = "{}{}".format(coloring, self.terminal.setaf(forecolor))
-        if backcolor is not None:
-            coloring = "{}{}".format(coloring, self.terminal.setab(backcolor))
-
-        return coloring
-
-    def colorend(self):
-        return self.terminal.op()
 
     def unzip(self, source_filename, dest_dir):
         with zipfile.ZipFile(source_filename) as zf:

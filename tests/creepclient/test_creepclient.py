@@ -35,6 +35,38 @@ def test_client():
     assert client.appdir != ""
 
 
+def test_get_attr(capsys):
+    """Test the special __getattr__ method on client"""
+    client = CreepClient()
+
+    # Nonexistent method that won't exist ever
+    try:
+        client.make_pizza()
+    except AttributeError:
+        assert True
+
+    # Help method that doesn't have a corresponding do_ method
+    try:
+        client.help_make_pizza()
+    except AttributeError:
+        assert True
+
+    func = client.help_version
+    func()
+    captured = capsys.readouterr()
+    assert captured.out == "Display creep version\n"
+
+
+def test_version(capsys):
+    """Test the 'version' command"""
+    client = CreepClient()
+    client.do_version([])
+    captured = capsys.readouterr()
+    assert "Creep v" in captured.out
+    assert "Targetting minecraft version" in captured.out
+    assert "Profile path" in captured.out
+
+
 def test_install_with_strategy_empty(capsys):
     cachedir, savedir = make_tmp_dirs()
     package = mock.MagicMock()
