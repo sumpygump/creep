@@ -123,6 +123,7 @@ Examples:
     def do_list(self, args):
         """List packages (mods)
 Usage: creep list [installed]
+  -s, --short   Short list (don't display descriptions)
 
 Examples:
   creep list
@@ -131,13 +132,26 @@ Examples:
   creep list installed
      List installed packages
 """
-        if args == 'installed':
-            installdir = self.profiledir + os.sep + 'mods'
-            self.get_packages_in_dir(installdir, display_list = True)
-        else:
-            self.display_packages()
+        args = shlex.split(args)
 
-    def get_packages_in_dir(self, dir_name, display_list = False, include_unknowns = True):
+        parser = argparse.ArgumentParser(add_help=False, prog="creep list")
+        parser.add_argument("installed", nargs="?")
+        parser.add_argument("-s", "--short", action="store_true")
+        pargs, _ = parser.parse_known_args(args)
+
+        if pargs.installed == "installed":
+            installdir = self.profiledir + os.sep + "mods"
+            self.get_packages_in_dir(
+                installdir, display_list=True, short_form=pargs.short
+            )
+        else:
+            self.display_packages(short_form=pargs.short)
+
+    def get_packages_in_dir(
+        self, dir_name, display_list=False, include_unknowns=True, short_form=False
+    ):
+        """Get the packages in a given directory"""
+
         ignore = ['.DS_Store']
         files = []
         try:
@@ -168,27 +182,45 @@ Examples:
         packages.sort(key=attrgetter('name'))
 
         if display_list:
-            print(self.colortext("Installed mods (in {}):".format(dir_name), self.terminal.C_YELLOW))
+            if not short_form:
+                print(
+                    self.colortext(
+                        "Installed mods (in {}):".format(dir_name),
+                        self.terminal.C_YELLOW,
+                    )
+                )
             for package in packages:
-                self.print_package(package)
+                self.print_package(package, short_form=short_form)
             if include_unknowns:
                 for name in unknownfiles:
                     print(self.colortext(name, self.terminal.C_RED))
 
         return library
 
-    def display_packages(self):
+    def display_packages(self, short_form=False):
         """Display list of packages available"""
         for package in self.repository.unique_packages:
-            self.print_package(package)
+            self.print_package(package, short_form=short_form)
 
-    def print_package(self, package):
-        message = u'{name}:{version} - {description} [{mcversion}]'.format(
-            name=package.name,
-            version=self.colortext(package.version, self.terminal.C_YELLOW),
-            description=self.colortext(package.description, self.terminal.C_MAGENTA),
-            mcversion=self.colortext(package.get_minecraft_version(), self.terminal.C_YELLOW)
-        )
+    def print_package(self, package, short_form=False):
+        """Print information about single package"""
+
+        if short_form:
+            message = "{name}:{version}".format(
+                name=package.name,
+                version=self.colortext(package.version, self.terminal.C_YELLOW),
+            )
+        else:
+            message = "{name}:{version} - {description} [{mcversion}]".format(
+                name=package.name,
+                version=self.colortext(package.version, self.terminal.C_YELLOW),
+                description=self.colortext(
+                    package.description, self.terminal.C_MAGENTA
+                ),
+                mcversion=self.colortext(
+                    package.get_minecraft_version(), self.terminal.C_YELLOW
+                ),
+            )
 
         if package.type == 'collection':
             message = message + self.colortext(' [collection]', self.terminal.C_CYAN)
