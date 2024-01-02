@@ -7,6 +7,7 @@ import os
 import pytest
 import shutil
 from unittest import mock
+import urllib.error
 
 from creepclient.creepclient import CreepClient
 from creepclient.entity.package import Package
@@ -92,6 +93,18 @@ def sample_mod_list(make_tmp_dirs):
         f.write(b"jei\njer-integration")
 
     return filename
+
+
+def make_file(filename):
+    """Make a file with some dummy content"""
+
+    # Get path to file and make sure it exists first
+    path = os.path.dirname(filename)
+    if not os.path.exists(path):
+        os.makedirs(path, exist_ok=True)
+
+    with open(filename, "wb") as f:
+        f.write(b"ABC")
 
 
 def test_client():
@@ -370,16 +383,138 @@ def test_install_no_deps(capsys, mocker):
     assert "Unknown package 'barnacle-fdsa'" in captured.out
 
 
+def test_install_no_deps_valid_package(capsys, mocker):
+    """Test the 'install' command"""
+
+    # Mock out the context manager of the urllib request
+    stub_response = mock.MagicMock()
+    stub_response.read.return_value = b"ABC"
+    stub_context = mock.MagicMock()
+    stub_context.__enter__.return_value = stub_response
+    mocker.patch(
+        "creepclient.entity.package.urllib.request.urlopen", return_value=stub_context
+    )
+
+    client = CreepClient(appdir=APP_DIR)
+    result = client.do_install("jer-integration -n")
+    captured = capsys.readouterr()
+    assert result is None
+    assert "Performing install and skipping dependencies" in captured.out
+    assert "Skipping dependency 'mezz/jei'" in captured.out
+    assert (
+        "Skipping dependency 'way2muchnoise/just-enough-resources-jer'" in captured.out
+    )
+    assert "Installed mod 'alasdiablo/jer-integration'" in captured.out
+
+
+def test_install_collection(capsys, mocker):
+    """Test the 'install' command"""
+
+    # Mock out the context manager of the urllib request
+    stub_response = mock.MagicMock()
+    stub_response.read.return_value = b"ABC"
+    stub_context = mock.MagicMock()
+    stub_context.__enter__.return_value = stub_response
+    mocker.patch(
+        "creepclient.entity.package.urllib.request.urlopen", return_value=stub_context
+    )
+
+    client = CreepClient(appdir=APP_DIR)
+    result = client.do_install("testing-collection")
+    captured = capsys.readouterr()
+    assert result is None
+    assert "Installing package 'sumpygump/testing-collection (1.0.0)'" in captured.out
+    assert "Installing dependency 'mezz/jei'" in captured.out
+    assert "Installed collection 'sumpygump/testing-collection'" in captured.out
+
+
+def test_install_collection_no_deps(capsys, mocker):
+    """Test the 'install' command"""
+
+    # Mock out the context manager of the urllib request
+    stub_response = mock.MagicMock()
+    stub_response.read.return_value = b"ABC"
+    stub_context = mock.MagicMock()
+    stub_context.__enter__.return_value = stub_response
+    mocker.patch(
+        "creepclient.entity.package.urllib.request.urlopen", return_value=stub_context
+    )
+
+    client = CreepClient(appdir=APP_DIR)
+    result = client.do_install("testing-collection -n")
+    captured = capsys.readouterr()
+    assert result is None
+    assert "Cannot install collection without dependencies." in captured.out
+
+
+def test_install_download_fails(capsys, mocker):
+    """Test the 'install' command"""
+
+    # Mock the url open will raise exception
+    mocker.patch(
+        "creepclient.entity.package.urllib.request.urlopen",
+        side_effect=urllib.error.URLError("failed"),
+    )
+
+    client = CreepClient(appdir=APP_DIR)
+    result = client.do_install("jei")
+    captured = capsys.readouterr()
+    assert result is None
+    assert "Download failed." in captured.out
+
+
 def test_install_from_list_file(capsys, mocker, sample_mod_list):
     """Test the 'install' command"""
+
+    # This file is what the download function would normally do
+    cachedir = os.path.join(TEST_DIR, "_creep", "cache", "mods")
+    make_file(os.path.join(cachedir, "mezz_jei_1.20.2-forge-16.0.0.28.jar"))
+    make_file(os.path.join(cachedir, "alasdiablo_jer-integration_4.3.1.jar"))
     mocker.patch("creepclient.repository.Package.download", return_value=True)
+
     sample_filename = sample_mod_list
 
     client = CreepClient(appdir=APP_DIR)
     result = client.do_install(" ".join(("--list", sample_filename)))
     captured = capsys.readouterr()
     assert result is None
-    assert "fdas" in captured.out
+    assert "Reading packages from file" in captured.out
+    assert "Installing package 'mezz/jei" in captured.out
+    assert "Installed mod 'mezz/jei' in" in captured.out
+    assert "Installing package 'alasdiablo/jer-integration (4.3.1)'" in captured.out
+    assert "Installed mod 'alasdiablo/jer-integration' in" in captured.out
+
+
+def test_install_from_list_noexist(capsys):
+    """Test the 'install' command"""
+
+    client = CreepClient(appdir=APP_DIR)
+    result = client.do_install("--list foobar_none.txt")
+    captured = capsys.readouterr()
+    assert result is None
+    assert "File 'foobar_none.txt' not found." in captured.out
+
+
+def test_install_with_strategy(mocker, capsys):
+    """Test the 'install' command with an install strategy"""
+
+    cachedir = os.path.join(TEST_DIR, "_creep", "cache", "mods")
+    os.makedirs(cachedir, exist_ok=True)
+    shutil.copy(
+        "tests/data/archive1.zip",
+        os.path.join(cachedir, "sumpygump_testing-strategy_1.0.0.zip"),
+    )
+
+    # This file is what the download function would normally do
+    cachedir = os.path.join(TEST_DIR, "_creep", "cache", "mods")
+    mocker.patch("creepclient.repository.Package.download", return_value=True)
+
+    client = CreepClient(appdir=APP_DIR)
+    result = client.do_install("testing-strategy")
+    captured = capsys.readouterr()
+    assert result is None
+    assert "Installing package 'sumpygump/testing-strategy" in captured.out
+    assert "Installing with strategy: unzip\n" in captured.out
 
 
 def test_install_with_strategy_empty(make_tmp_dirs, capsys):

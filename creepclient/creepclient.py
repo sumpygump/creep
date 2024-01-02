@@ -1,17 +1,17 @@
 """CLI client for creep"""
 
 import argparse
-import cmd  # Command interpreter logic. Gives us the base class for the client
-import inspect  # Functions to inspect live objects
-import json  # JSON encoder and decoder
-import os  # Miscellaneous operating system interfaces
-import shlex  # Lexical analysis of user input.
-import shutil  # High-level file operations
-import subprocess  # Spawn subprocesses, connect in/out pipes, obtain return codes
-import sys  # System specific parameters and functions
-import tempfile  # Temporary file utilities
+import cmd
+import inspect
+import json
+import os
+import shlex
+import shutil
+import subprocess
+import sys
+import tempfile
 import textwrap
-import zipfile  # Zip file utilities
+import zipfile
 
 from qi.console.client import Client
 from operator import attrgetter
@@ -354,12 +354,24 @@ class CreepClient(Client, cmd.Cmd):
             self.install_from_listfile(pargs.listfile)
 
     def install_package(self, packagename):
+        """Install a package by name"""
+
         package = self.repository.fetch_package(packagename)
         if not package:
             print(self.text_error(f"Unknown package '{packagename}'"))
             return False
 
-        print(self.text_info(f"Installing package {package}"))
+        # Detect if a collection type and no deps mode
+        if package.type == "collection" and not self.install_dependencies:
+            print(
+                self.text_error(
+                    "Cannot install collection without dependencies. "
+                    "Try again without flag -n / --no-dependencies."
+                )
+            )
+            return False
+
+        print(self.text_info(f"Installing package '{package}'"))
 
         # Install any required packages
         # Warning: does not handle versions or circular dependencies
@@ -374,7 +386,7 @@ class CreepClient(Client, cmd.Cmd):
 
         if package.type == "collection":
             # Collection only has dependencies
-            print(self.text_success(f"  Installed collection '{package.name}'"))
+            print(self.text_success(f"Installed collection '{package.name}'"))
         else:
             cachedir = os.path.join(self.appdir, "cache", package.installdir)
 

@@ -52,6 +52,41 @@
                 "homepage": "https:\/\/www.curseforge.com\/minecraft\/mc-mods\/jei",
                 "url": "https:\/\/edge.forgecdn.net\/files\/4609\/866\/jei-1.20.1-forge-15.2.0.22.jar"
             }
+        },
+        "sumpygump\/testing-collection": {
+            "1.20.2-1.0.0": {
+                "name": "sumpygump\/testing-collection",
+                "version": "1.0.0",
+                "type": "collection",
+                "description": "Collection example package",
+                "keywords": "client-side",
+                "require": {
+                    "minecraft": "1.20.2",
+                    "forge": "*",
+                    "mezz\/jei": "*",
+                    "alasdiablo\/jer-integration": "*"
+                },
+                "filename": "",
+                "author": "sumpygump",
+                "homepage": "https:\/\/abc.def"
+            }
+        },
+        "sumpygump\/testing-strategy": {
+            "1.20.2-1.0.0": {
+                "name": "sumpygump\/testing-strategy",
+                "version": "1.0.0",
+                "type": "mod",
+                "description": "Install strategy example package",
+                "keywords": "testing",
+                "require": {
+                    "minecraft": "1.20.2",
+                    "forge": "*"
+                },
+                "filename": "archive1.zip",
+                "installstrategy": "unzip",
+                "author": "sumpygump",
+                "homepage": "https:\/\/abc.def"
+            }
         }
     }
 }
