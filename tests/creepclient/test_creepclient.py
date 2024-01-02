@@ -1,43 +1,118 @@
 """Tests for creepclient module"""
 
+# pylint: disable=redefined-outer-name
+
+import json
 import os
+import pytest
 import shutil
 from unittest import mock
 
 from creepclient.creepclient import CreepClient
-from creepclient.repository import Repository
+from creepclient.entity.package import Package
 
-TEST_APP_DIR = "/tmp/creep-testing"
+TEST_DIR = "/tmp/creep-testing"
+APP_DIR = os.path.join(TEST_DIR, "_creep")
 
 
+@pytest.fixture(autouse=True)
 def make_tmp_dirs():
     """Make some tmp dirs for use during testing"""
-    tmpbase = TEST_APP_DIR
+    tmpbase = TEST_DIR
     if os.path.exists(tmpbase):
         shutil.rmtree(tmpbase)
 
+    os.makedirs(APP_DIR, exist_ok=True)
+
     cachedir = os.path.join(tmpbase, "cache")
-    savedir = os.path.join(tmpbase, "save")
     os.makedirs(cachedir, exist_ok=True)
+
+    savedir = os.path.join(tmpbase, "save")
     os.makedirs(savedir, exist_ok=True)
-    return cachedir, savedir
+
+    # Add sample packages file
+    shutil.copy("tests/data/packages.json", os.path.join(APP_DIR, "packages.json"))
+
+    # Define sample user options file
+    make_options(
+        os.path.join(APP_DIR, "options.json"),
+        {
+            "minecraft_target": "1.20.2",
+            "profile_dir": os.path.join(TEST_DIR, "_minecraft"),
+        },
+    )
+
+    yield cachedir, savedir
+
+    # Tear down
+    clean_up_tmp_dir()
 
 
 def clean_up_tmp_dir():
-    tmpbase = TEST_APP_DIR
-    if os.path.exists(tmpbase):
-        shutil.rmtree(tmpbase)
+    if os.path.exists(TEST_DIR):
+        shutil.rmtree(TEST_DIR)
+
+
+def make_options(options_path, data):
+    with open(options_path, "w", encoding="utf-8") as outfile:
+        json.dump(
+            {
+                "minecraft_target": data.get("minecraft_target", ""),
+                "profile_dir": data.get("profile_dir", ""),
+            },
+            outfile,
+            indent=4,
+        )
+
+
+@pytest.fixture
+def sample_mods(make_tmp_dirs):
+    _ = make_tmp_dirs
+    mods_path = os.path.join(TEST_DIR, "_minecraft", "mods")
+    os.makedirs(mods_path, exist_ok=True)
+
+    # Just create some fake 'jar' files in the mods dir
+    filenames = ["example.jar", "jei-1.20.2-forge-16.0.0.28.jar"]
+    for filename in filenames:
+        with open(os.path.join(mods_path, filename), "wb") as f:
+            f.write(b"ABC")
+
+    # Also add a file that is ignored
+    with open(os.path.join(mods_path, ".DS_Store"), "wb") as f:
+        f.write(b"ABC")
+
+    return filenames
+
+
+@pytest.fixture
+def sample_mod_list(make_tmp_dirs):
+    _ = make_tmp_dirs
+    filename = os.path.join(TEST_DIR, "sample_mod_list.txt")
+    with open(filename, "wb") as f:
+        f.write(b"jei\njer-integration")
+
+    return filename
 
 
 def test_client():
-    client = CreepClient()
-    assert client.version != "1.1"
-    assert client.appdir != ""
+    client = CreepClient(appdir=APP_DIR)
+    assert client.version != "0.2"
+    assert client.appdir == APP_DIR
+    assert client.minecraft_target == "1.20.2"
+    assert client.profiledir == os.path.join(TEST_DIR, "_minecraft")
+
+
+def test_client_default_options():
+    # If the options file isn't there, starts with default options
+    os.unlink(os.path.join(APP_DIR, "options.json"))
+    client = CreepClient(appdir=APP_DIR)
+    assert client.minecraft_target == "1.20.1"
+    assert client.profiledir != os.path.join(TEST_DIR, "_minecraft")
 
 
 def test_get_attr(capsys):
     """Test the special __getattr__ method on client"""
-    client = CreepClient()
+    client = CreepClient(appdir=APP_DIR)
 
     # Nonexistent method that won't exist ever
     try:
@@ -59,7 +134,7 @@ def test_get_attr(capsys):
 
 def test_version(capsys):
     """Test the 'version' command"""
-    client = CreepClient()
+    client = CreepClient(appdir=APP_DIR)
     client.do_version([])
     captured = capsys.readouterr()
     assert "Creep v" in captured.out
@@ -67,42 +142,281 @@ def test_version(capsys):
     assert "Profile path" in captured.out
 
 
-def test_install_with_strategy_empty(capsys):
-    cachedir, savedir = make_tmp_dirs()
+def test_target(capsys):
+    """Test the 'target' command"""
+    client = CreepClient(appdir=APP_DIR)
+    client.do_target("")
+    captured = capsys.readouterr()
+    assert "Targetting minecraft version" in captured.out
+
+
+def test_target_set(capsys):
+    """Test the 'target' command"""
+    client = CreepClient(appdir=APP_DIR)
+    client.do_target("1.20.2")
+    captured = capsys.readouterr()
+    assert "Targetting minecraft version" in captured.out
+    assert client.minecraft_target == "1.20.2"
+
+    client = CreepClient(appdir=APP_DIR)
+    assert client.minecraft_target == "1.20.2"
+
+
+def test_profile(capsys):
+    """Test the 'profile' command"""
+    client = CreepClient(appdir=APP_DIR)
+    client.do_profile("")
+    captured = capsys.readouterr()
+    assert "Profile path" in captured.out
+
+
+def test_profile_set(capsys):
+    """Test the 'profile' command"""
+    client = CreepClient(appdir=APP_DIR)
+    client.do_profile("/tmp/creep-testing/")
+    captured = capsys.readouterr()
+    assert "Profile path" in captured.out
+    assert client.profiledir == "/tmp/creep-testing"
+
+    client = CreepClient(appdir=APP_DIR)
+    assert client.profiledir == "/tmp/creep-testing"
+    client.do_profile("/")
+    captured = capsys.readouterr()
+    assert "Invalid directory" in captured.out
+    assert client.profiledir == "/tmp/creep-testing"
+
+
+def test_profile_set_invalid(capsys):
+    """Test the 'profile' command"""
+    client = CreepClient(appdir=APP_DIR)
+    client.do_profile("/tmp/barnacles/")
+    captured = capsys.readouterr()
+    assert "Invalid directory" in captured.out
+
+
+def test_list(capsys):
+    """Test the 'list' command"""
+    client = CreepClient(appdir=APP_DIR)
+    client.do_list("")
+    captured = capsys.readouterr()
+    assert "mezz/jei" in captured.out
+    assert "View Items and Recipes" in captured.out
+    assert "jer-integration" in captured.out
+
+
+def test_list_short(capsys):
+    """Test the 'list' command"""
+    client = CreepClient(appdir=APP_DIR)
+    client.do_list("--short")
+    captured = capsys.readouterr()
+    assert "mezz/jei" in captured.out
+    assert "View Items and Recipes" not in captured.out
+    assert "jer-integration" in captured.out
+
+
+def test_list_installed(capsys):
+    """Test the 'list' command"""
+    client = CreepClient(appdir=APP_DIR)
+    client.do_list("installed")
+    captured = capsys.readouterr()
+    assert "Looking in /tmp/creep-testing/_minecraft/mods" in captured.out
+    assert "No mods installed" in captured.out
+
+
+def test_get_packages_in_dir(sample_mods):
+    """Test the get_packages_in_dir method"""
+    filenames = sample_mods
+    client = CreepClient(appdir=APP_DIR)
+    library = client.get_packages_in_dir(os.path.join(TEST_DIR, "_minecraft", "mods"))
+    assert library != {}
+    assert len(library) == len(filenames)
+
+    # The first one is unknown, the second one is a valid package obj
+    assert library[filenames[0]] is None
+    assert isinstance(library[filenames[1]], Package)
+
+
+def test_get_packages_in_dir_display(sample_mods, capsys):
+    """Test the get_packages_in_dir method but with display mode enabled"""
+    _ = sample_mods
+    client = CreepClient(appdir=APP_DIR)
+    mods_path = os.path.join(TEST_DIR, "_minecraft", "mods")
+    library = client.get_packages_in_dir(mods_path, display_list=True)
+    assert library != {}
+
+    captured = capsys.readouterr()
+    assert "Installed mods (in" in captured.out
+    assert "mezz/jei" in captured.out
+    assert "View Items and Recipes" in captured.out
+    assert "example.jar" in captured.out
+
+
+def test_get_packages_in_dir_display_no_unknowns(sample_mods, capsys):
+    """Test the get_packages_in_dir method but with display mode enabled,
+    exclude unknown packages"""
+    _ = sample_mods
+    client = CreepClient(appdir=APP_DIR)
+    mods_path = os.path.join(TEST_DIR, "_minecraft", "mods")
+    library = client.get_packages_in_dir(
+        mods_path, display_list=True, include_unknowns=False
+    )
+    assert library != {}
+    captured = capsys.readouterr()
+    assert "Installed mods (in" in captured.out
+    assert "mezz/jei" in captured.out
+    assert "View Items and Recipes" in captured.out
+    assert "example.jar" not in captured.out
+
+
+def test_get_packages_in_dir_display_short_form(sample_mods, capsys):
+    """Test the get_packages_in_dir method but with display mode enabled,
+    short form flag"""
+    _ = sample_mods
+    client = CreepClient(appdir=APP_DIR)
+    mods_path = os.path.join(TEST_DIR, "_minecraft", "mods")
+    library = client.get_packages_in_dir(mods_path, display_list=True, short_form=True)
+    assert library != {}
+    captured = capsys.readouterr()
+    assert "Installed mods (in" not in captured.out
+    assert "mezz/jei" in captured.out
+    assert "View Items and Recipes" not in captured.out
+    assert "example.jar" in captured.out
+
+
+def test_search_blank(capsys):
+    """Test the 'search' command"""
+    client = CreepClient(appdir=APP_DIR)
+    result = client.do_search("")
+    captured = capsys.readouterr()
+    assert result == 1
+    assert "Missing argument" in captured.out
+
+
+def test_search(capsys):
+    """Test the 'search' command"""
+    client = CreepClient(appdir=APP_DIR)
+    client.do_search("jei")
+    captured = capsys.readouterr()
+    assert "mezz/jei" in captured.out
+
+
+def test_info_missing_arg(capsys):
+    """Test the 'info' command"""
+    client = CreepClient(appdir=APP_DIR)
+    result = client.do_info("")
+    captured = capsys.readouterr()
+    assert result == 1
+    assert "Missing argument" in captured.out
+
+
+def test_info_unknown_package(capsys):
+    """Test the 'info' command"""
+    client = CreepClient(appdir=APP_DIR)
+    result = client.do_info("fdsarew")
+    captured = capsys.readouterr()
+    assert result == 1
+    assert "Unknown package 'fdsarew'" in captured.out
+
+
+def test_info(capsys):
+    """Test the 'info' command"""
+    client = CreepClient(appdir=APP_DIR)
+    client.do_info("jei")
+    captured = capsys.readouterr()
+    assert "mezz/jei" in captured.out
+    assert "Version:" in captured.out
+    assert "Keywords:" in captured.out
+    assert "Dependencies:" in captured.out
+
+
+def test_install_blank(capsys):
+    """Test the 'install' command"""
+    client = CreepClient(appdir=APP_DIR)
+    result = client.do_install("")
+    captured = capsys.readouterr()
+    assert result == 1
+    assert "Missing argument" in captured.out
+
+
+def test_install_unknown(capsys):
+    """Test the 'install' command"""
+    client = CreepClient(appdir=APP_DIR)
+    result = client.do_install("barnacle-fdsa")
+    captured = capsys.readouterr()
+    assert result is None
+    assert "Unknown package 'barnacle-fdsa'" in captured.out
+
+
+def test_install(capsys, mocker):
+    """Test the 'install' command"""
+    mocker.patch("creepclient.repository.Package.download", return_value=True)
+
+    client = CreepClient(appdir=APP_DIR)
+    result = client.do_install("barnacle-fdsa")
+    captured = capsys.readouterr()
+    assert result is None
+    assert "Unknown package 'barnacle-fdsa'" in captured.out
+
+
+def test_install_no_deps(capsys, mocker):
+    """Test the 'install' command"""
+    mocker.patch("creepclient.repository.Package.download", return_value=True)
+
+    client = CreepClient(appdir=APP_DIR)
+    result = client.do_install("barnacle-fdsa -n")
+    captured = capsys.readouterr()
+    assert result is None
+    assert "skipping dependencies" in captured.out
+    assert "Unknown package 'barnacle-fdsa'" in captured.out
+
+
+def test_install_from_list_file(capsys, mocker, sample_mod_list):
+    """Test the 'install' command"""
+    mocker.patch("creepclient.repository.Package.download", return_value=True)
+    sample_filename = sample_mod_list
+
+    client = CreepClient(appdir=APP_DIR)
+    result = client.do_install(" ".join(("--list", sample_filename)))
+    captured = capsys.readouterr()
+    assert result is None
+    assert "fdas" in captured.out
+
+
+def test_install_with_strategy_empty(make_tmp_dirs, capsys):
+    cachedir, savedir = make_tmp_dirs
     package = mock.MagicMock()
     package.name = "flans_mod"
     package.get_local_filename.return_value = "archive1.zip"
 
-    client = CreepClient()
+    client = CreepClient(appdir=APP_DIR)
     result = client.install_with_strategy("", package, cachedir, savedir)
     captured = capsys.readouterr()
     assert result is None
     assert captured.out == ""
 
 
-def test_install_with_strategy_noop(capsys):
-    cachedir, savedir = make_tmp_dirs()
+def test_install_with_strategy_noop(make_tmp_dirs, capsys):
+    cachedir, savedir = make_tmp_dirs
     package = mock.MagicMock()
     package.name = "flans_mod"
     package.get_local_filename.return_value = "archive1.zip"
 
-    client = CreepClient()
+    client = CreepClient(appdir=APP_DIR)
     result = client.install_with_strategy("do;not;anything", package, cachedir, savedir)
     captured = capsys.readouterr()
     assert result is True
     assert captured.out == "Installing with strategy: do;not;anything\n"
-    clean_up_tmp_dir()
 
 
-def test_install_with_strategy_unzip_only(capsys):
-    cachedir, savedir = make_tmp_dirs()
+def test_install_with_strategy_unzip_only(make_tmp_dirs, capsys):
+    cachedir, savedir = make_tmp_dirs
     shutil.copy("tests/data/archive1.zip", os.path.join(cachedir, "archive1.zip"))
 
     package = mock.MagicMock()
     package.name = "flans_mod"
     package.get_local_filename.return_value = "archive1.zip"
 
-    client = CreepClient()
+    client = CreepClient(appdir=APP_DIR)
     result = client.install_with_strategy("unzip", package, cachedir, savedir)
     captured = capsys.readouterr()
     assert result is True
@@ -110,19 +424,18 @@ def test_install_with_strategy_unzip_only(capsys):
         "Installing with strategy: unzip\n"
         "Unzipping archive: /tmp/creep-testing/cache/archive1.zip\n"
     )
-    clean_up_tmp_dir()
 
 
-def test_install_with_strategy_unzip_and_move(capsys):
+def test_install_with_strategy_unzip_and_move(make_tmp_dirs, capsys):
     # Example with unzip and move, but the savedir already exists
-    cachedir, savedir = make_tmp_dirs()
+    cachedir, savedir = make_tmp_dirs
     shutil.copy("tests/data/archive1.zip", os.path.join(cachedir, "archive1.zip"))
 
     package = mock.MagicMock()
     package.name = "flans_mod"
     package.get_local_filename.return_value = "archive1.zip"
 
-    client = CreepClient()
+    client = CreepClient(appdir=APP_DIR)
     strategy = "unzip;move dir1"
     result = client.install_with_strategy(strategy, package, cachedir, savedir)
     captured = capsys.readouterr()
@@ -133,19 +446,18 @@ def test_install_with_strategy_unzip_and_move(capsys):
         "Moving files: dir1\n"
     )
     assert sorted(os.listdir(savedir)) == ["file1.txt", "file2.txt", "file3.txt"]
-    clean_up_tmp_dir()
 
 
-def test_install_with_strategy_unzip_and_move_new(capsys):
+def test_install_with_strategy_unzip_and_move_new(make_tmp_dirs, capsys):
     # Example with unzip and move, but the savedir doesn't exist
-    cachedir, savedir = make_tmp_dirs()
+    cachedir, savedir = make_tmp_dirs
     shutil.copy("tests/data/archive1.zip", os.path.join(cachedir, "archive1.zip"))
 
     package = mock.MagicMock()
     package.name = "flans_mod"
     package.get_local_filename.return_value = "archive1.zip"
 
-    client = CreepClient()
+    client = CreepClient(appdir=APP_DIR)
     strategy = "unzip;move dir1"
     save_alt = savedir.replace("save", "save_alt")
     result = client.install_with_strategy(strategy, package, cachedir, save_alt)
@@ -157,19 +469,18 @@ def test_install_with_strategy_unzip_and_move_new(capsys):
         "Moving files: dir1\n"
     )
     assert sorted(os.listdir(save_alt)) == ["file1.txt", "file2.txt", "file3.txt"]
-    clean_up_tmp_dir()
 
 
-def test_install_with_strategy_with_star(capsys):
+def test_install_with_strategy_with_star(make_tmp_dirs, capsys):
     # Example with unzip and move using move /*
-    cachedir, savedir = make_tmp_dirs()
+    cachedir, savedir = make_tmp_dirs
     shutil.copy("tests/data/archive1.zip", os.path.join(cachedir, "archive1.zip"))
 
     package = mock.MagicMock()
     package.name = "flans_mod"
     package.get_local_filename.return_value = "archive1.zip"
 
-    client = CreepClient()
+    client = CreepClient(appdir=APP_DIR)
     strategy = "unzip; move 'dir1/*'"
     result = client.install_with_strategy(strategy, package, cachedir, savedir)
     captured = capsys.readouterr()
@@ -180,4 +491,3 @@ def test_install_with_strategy_with_star(capsys):
         "Moving files: dir1/*\n"
     )
     assert sorted(os.listdir(savedir)) == ["file1.txt", "file2.txt", "file3.txt"]
-    clean_up_tmp_dir()

@@ -16,8 +16,7 @@ import zipfile  # Zip file utilities
 from qi.console.client import Client
 from operator import attrgetter
 from .repository import Repository
-
-DEFAULT_TARGET = "1.16.5"
+from .config import DEFAULT_TARGET
 
 
 class CreepClient(Client, cmd.Cmd):
@@ -26,31 +25,29 @@ class CreepClient(Client, cmd.Cmd):
     # Version of this client
     version = "1.1"
 
-    # Absolute path where this client is installed
-    installdir = ""
-
     # Absolute path to the dotfile for this client
     appdir = ""
 
     # Absolute path to the minecraft dir
     minecraftdir = ""
 
-    # Version of minecraft to target for mods
-    minecraft_target = ""
-
     # Directory for minecraft profile
     profiledir = ""
+
+    # Version of minecraft to target for mods
+    minecraft_target = ""
 
     # Whether should install dependencies too
     install_dependencies = True
 
-    def __init__(self, **kwargs):
+    def __init__(self, appdir=None, **kwargs):
         """Constructor"""
+
         cmd.Cmd.__init__(self)
         Client.__init__(self, **kwargs)
 
         self.update_version_with_git_describe()
-        self.update_paths()
+        self.update_paths(appdir=appdir)
         self.load_options()
 
         self.create_repository()
@@ -83,42 +80,21 @@ class CreepClient(Client, cmd.Cmd):
         self.display_target()
         self.display_profile()
 
-    def do_target(self, args):
-        """Set the targeted minecraft version
-        Usage: creep target <minecraft_version>
-
-        Examples:
-          creep target 1.16.5
-             Set the version of minecraft for mods"""
-
-        if len(args) > 0:
-            # TODO: Validate against ~/.minecraft/launcher_profiles.json for
-            # valid versions to use
-            self.minecraft_target = args
-
-        self.display_target()
-        self.repository.set_minecraft_target(self.minecraft_target)
-        self.save_options()
-
-    def display_target(self):
-        print(
-            self.text_success(f"Targetting minecraft version {self.minecraft_target}")
-        )
-
     def load_options(self):
-        # TODO: More robust user options file handling. It should be its own
-        # object to load options
+        """Load user creep config options from disk"""
+
         options_path = os.path.join(self.appdir, "options.json")
         if os.path.isfile(options_path):
             with open(options_path, "r", encoding="utf-8") as fd:
                 options = json.load(fd)
-                self.minecraft_target = options.get("minecraft_target", DEFAULT_TARGET)
-                self.profiledir = options.get("profile_dir", self.minecraftdir)
         else:
-            self.minecraft_target = DEFAULT_TARGET
-            self.profiledir = self.minecraftdir
+            options = {}
+
+        self.minecraft_target = options.get("minecraft_target", DEFAULT_TARGET)
+        self.profiledir = options.get("profile_dir", self.minecraftdir)
 
     def save_options(self):
+        """Save user creep config options to disk"""
         options_path = os.path.join(self.appdir, "options.json")
         with open(options_path, "w", encoding="utf-8") as outfile:
             json.dump(
@@ -127,13 +103,43 @@ class CreepClient(Client, cmd.Cmd):
                     "profile_dir": self.profiledir,
                 },
                 outfile,
+                indent=4,
             )
 
-    def do_profile(self, args):
-        """Set the path to the profile where you want to manage mods
-        Usage: creep profile <path/to/minecraft/profile>
+    def do_target(self, args):
+        """View or set the targeted minecraft version
+        Usage: creep target [minecraft_version]
 
         Examples:
+          creep target
+             Show the current target minecraft version
+
+          creep target 1.16.5
+             Set the target minecraft version for mods"""
+
+        if len(args) > 0:
+            print("args", args)
+            # TODO: Validate against ~/.minecraft/launcher_profiles.json for
+            # valid versions to use
+            self.minecraft_target = args
+            self.repository.set_minecraft_target(self.minecraft_target)
+            self.save_options()
+
+        self.display_target()
+
+    def display_target(self):
+        print(
+            self.text_success(f"Targetting minecraft version {self.minecraft_target}")
+        )
+
+    def do_profile(self, args):
+        """View or set the path to the profile where creep is managing mods
+        Usage: creep profile [path/to/minecraft/profile]
+
+        Examples:
+          creep profile
+            View the current profile path
+
           creep profile ~/.minecraft
             Set the minecraft profile path"""
         if len(args) > 0:
@@ -143,9 +149,9 @@ class CreepClient(Client, cmd.Cmd):
                 print(self.text_error(f"Invalid directory '{new_profile_dir}'"))
             else:
                 self.profiledir = new_profile_dir
+                self.save_options()
 
         self.display_profile()
-        self.save_options()
 
     def display_profile(self):
         print(self.text_success(f"Profile path '{self.profiledir}'"))
@@ -274,8 +280,10 @@ class CreepClient(Client, cmd.Cmd):
                   creep search optifine
                   creep search tools
                   creep search blake"""
-        if args == "":
-            return False
+
+        if len(args) == 0:
+            print(self.text_error("Missing argument"))
+            return 1
 
         packages = self.repository.search(args)
         for package in packages:
@@ -318,6 +326,7 @@ class CreepClient(Client, cmd.Cmd):
                   creep install just-enough-items:1.12.2-4.9.2.196
                   creep install mezz/just-enough-items:1.12.2-4.9.2.196
                   creep install -l mymodlist.txt"""
+
         args = shlex.split(args)
 
         if len(args) == 0:
@@ -348,7 +357,7 @@ class CreepClient(Client, cmd.Cmd):
         package = self.repository.fetch_package(packagename)
         if not package:
             print(self.text_error(f"Unknown package '{packagename}'"))
-            return 1
+            return False
 
         print(self.text_info(f"Installing package {package}"))
 
@@ -392,7 +401,7 @@ class CreepClient(Client, cmd.Cmd):
 
             if not os.path.isdir(savedir):
                 print(self.text_notify(f"Creating directory '{savedir}'"))
-                os.mkdir(savedir)
+                os.makedirs(savedir, exist_ok=True)
 
             if package.installstrategy:
                 self.install_with_strategy(
@@ -691,11 +700,14 @@ class CreepClient(Client, cmd.Cmd):
         else:
             self.repository.populate("", True)
 
-    def update_paths(self):
+    def update_paths(self, appdir=None):
         """Set configured paths utilized by creep client"""
 
         # Creep app dir
-        self.appdir = self.get_home_path(".creep")
+        if appdir is None:
+            self.appdir = self.get_home_path(".creep")
+        else:
+            self.appdir = appdir
         if not os.path.isdir(self.appdir):
             os.mkdir(self.appdir)
 

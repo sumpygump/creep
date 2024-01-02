@@ -1,0 +1,57 @@
+{
+    "repository_version": "e397849ee30ec3a306b29a9629394a5b",
+    "date": "2023-12-29 17:52:10",
+    "packages": {
+        "alasdiablo\/jer-integration": {
+            "1.19.2-4.3.1": {
+                "name": "alasdiablo\/jer-integration",
+                "version": "4.3.1",
+                "type": "mod",
+                "description": "Add more computability to Just Enough Resources (JER)",
+                "keywords": "map-and-information, addons",
+                "require": {
+                    "minecraft": "1.20.2",
+                    "forge": "*",
+                    "mezz\/jei": "*",
+                    "way2muchnoise\/just-enough-resources-jer": "*"
+                },
+                "filename": "JER-Integration-4.3.1.jar",
+                "author": "AlasDiablo",
+                "homepage": "https:\/\/www.curseforge.com\/minecraft\/mc-mods\/jer-integration",
+                "url": "https:\/\/edge.forgecdn.net\/files\/4014\/255\/JER-Integration-4.3.1.jar"
+            }
+        },
+        "mezz\/jei": {
+            "1.20.2-1.20.2-forge-16.0.0.28": {
+                "name": "mezz\/jei",
+                "version": "1.20.2-forge-16.0.0.28",
+                "type": "mod",
+                "description": "View Items and Recipes",
+                "keywords": "api-and-library, map-and-information",
+                "require": {
+                    "minecraft": "1.20.2",
+                    "forge": "*"
+                },
+                "filename": "jei-1.20.2-forge-16.0.0.28.jar",
+                "author": "mezz",
+                "homepage": "https:\/\/www.curseforge.com\/minecraft\/mc-mods\/jei",
+                "url": "https:\/\/edge.forgecdn.net\/files\/4767\/571\/jei-1.20.2-forge-16.0.0.28.jar"
+            },
+            "1.20.1-1.20.1-forge-15.2.0.22.jar": {
+                "name": "mezz\/jei",
+                "version": "1.20.1-forge-15.2.0.22.jar",
+                "type": "mod",
+                "description": "View Items and Recipes",
+                "keywords": "api-and-library, map-and-information",
+                "require": {
+                    "minecraft": "1.20.1",
+                    "forge": "*"
+                },
+                "filename": "jei-1.20.1-forge-15.2.0.22.jar",
+                "author": "mezz",
+                "homepage": "https:\/\/www.curseforge.com\/minecraft\/mc-mods\/jei",
+                "url": "https:\/\/edge.forgecdn.net\/files\/4609\/866\/jei-1.20.1-forge-15.2.0.22.jar"
+            }
+        }
+    }
+}

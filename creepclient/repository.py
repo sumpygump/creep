@@ -10,6 +10,13 @@ import urllib.error
 
 from operator import attrgetter
 from .entity.package import Package
+from .config import DEFAULT_TARGET, REMOTE_URL
+
+# Remote fetching timeout value (in seconds)
+TIMEOUT = 5
+
+# Local registry cache lifetime in seconds
+CACHE_EXPIRES = 3600
 
 
 def cmp(a, b):
@@ -19,16 +26,9 @@ def cmp(a, b):
 class Repository:
     """Repository class"""
 
-    remote_url = "http://quantalideas.com/mcpackages/packages.json"
-    # remote_url = 'http://creep-packages.lvh.me/packages.json'
+    remote_url = REMOTE_URL
     version_hash = ""
     version_date = ""
-
-    # Remote fetching timeout value (in seconds)
-    timeout = 5
-
-    # Local registry cache lifetime in seconds
-    cache_life = 3600
 
     # Has every package, including every version of each
     packages = []
@@ -40,7 +40,7 @@ class Repository:
     simple_name_packages = {}
 
     # Currently targeted version of minecraft
-    minecraft_target = "1.16.1"
+    minecraft_target = DEFAULT_TARGET
 
     def __init__(self, appdir):
         self.localdir = os.path.join(appdir, "packages.json")
@@ -51,9 +51,7 @@ class Repository:
     def download_remote_repository(self):
         print(f"Refreshing registry file from {self.remote_url}")
         try:
-            with urllib.request.urlopen(
-                self.remote_url, timeout=self.timeout
-            ) as response:
+            with urllib.request.urlopen(self.remote_url, timeout=TIMEOUT) as response:
                 with open(self.localdir, "wb") as f:
                     f.write(response.read())
         except urllib.error.URLError:
@@ -73,7 +71,7 @@ class Repository:
         # Check repository file date last modified
         # If it is older than specified time, redownload
         filetime = os.stat(self.localdir).st_mtime
-        if filetime + self.cache_life < calendar.timegm(time.gmtime()):
+        if filetime + CACHE_EXPIRES < calendar.timegm(time.gmtime()):
             if not self.download_remote_repository():
                 print(
                     (

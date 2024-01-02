@@ -47,7 +47,7 @@ lint:
 tests:
 	$(if $(value VIRTUAL_ENV),,$(error "First activate environment"))
 	@echo "$(ccyellow)> Running tests...$(ccend)"
-	-coverage run --branch --source=. .venv/bin/pytest $(TFLAGS)
+	-coverage run --branch --source=. -m pytest -p no:sugar $(TFLAGS)
 	coverage html --skip-empty
 	@echo
 
