@@ -626,3 +626,37 @@ def test_install_with_strategy_with_star(make_tmp_dirs, capsys):
         "Moving files: dir1/*\n"
     )
     assert sorted(os.listdir(savedir)) == ["file1.txt", "file2.txt", "file3.txt"]
+
+
+def test_uninstall_missing(capsys):
+    """Test the 'uninstall' command"""
+
+    client = CreepClient(appdir=APP_DIR)
+    result = client.do_uninstall("")
+    captured = capsys.readouterr()
+    assert result == 1
+    assert "Missing argument\n" == captured.out
+
+
+def test_uninstall_unknown(capsys):
+    """Test the 'uninstall' command"""
+
+    client = CreepClient(appdir=APP_DIR)
+    result = client.do_uninstall("foobarz")
+    captured = capsys.readouterr()
+    assert result == 1
+    assert "Unknown package foobarz\n" == captured.out
+
+
+def test_uninstall(capsys):
+    """Test the 'uninstall' command"""
+
+    # This file is what the download function would normally do
+    mods_dir = os.path.join(TEST_DIR, "_minecraft", "mods")
+    make_file(os.path.join(mods_dir, "mezz_jei_1.20.2-forge-16.0.0.28.jar"))
+
+    client = CreepClient(appdir=APP_DIR)
+    result = client.do_uninstall("jei")
+    captured = capsys.readouterr()
+    assert result is None
+    assert "Removed mod 'mezz/jei' from" in captured.out

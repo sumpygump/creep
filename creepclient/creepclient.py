@@ -499,9 +499,14 @@ class CreepClient(Client, cmd.Cmd):
         Usage: creep uninstall <packagename>
 
         Example: creep uninstall thecricket/chisel2"""
+
+        if len(args) == 0:
+            print(self.text_error("Missing argument"))
+            return 1
+
         package = self.repository.fetch_package(args)
         if not package:
-            print("Unknown package {}".format(args))
+            print(self.text_error(f"Unknown package {args}"))
             return 1
 
         savedir = os.path.join(self.profiledir, package.installdir)
