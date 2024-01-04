@@ -79,6 +79,7 @@ class CreepClient(Client, cmd.Cmd):
         print(self.text_success(f"Creep v{self.version}"))
         self.display_target()
         self.display_profile()
+        return 0
 
     def load_options(self):
         """Load user creep config options from disk"""
@@ -126,6 +127,7 @@ class CreepClient(Client, cmd.Cmd):
             self.save_options()
 
         self.display_target()
+        return 0
 
     def display_target(self):
         print(
@@ -152,6 +154,7 @@ class CreepClient(Client, cmd.Cmd):
                 self.save_options()
 
         self.display_profile()
+        return 0
 
     def display_profile(self):
         print(self.text_success(f"Profile path '{self.profiledir}'"))
@@ -181,6 +184,8 @@ class CreepClient(Client, cmd.Cmd):
             )
         else:
             self.display_packages(short_form=pargs.short)
+
+        return 0
 
     def get_packages_in_dir(
         self, dir_name, display_list=False, include_unknowns=True, short_form=False
@@ -289,6 +294,8 @@ class CreepClient(Client, cmd.Cmd):
         for package in packages:
             self.print_package(package)
 
+        return 0
+
     def do_info(self, args):
         """Display details for a specific package (mod)
         Usage: creep info <packagename>
@@ -304,6 +311,8 @@ class CreepClient(Client, cmd.Cmd):
             return 1
 
         self.print_package_details(package)
+
+        return 0
 
     def do_install(self, args):
         """Install a package (mod). This will install a given mod and its dependencies
@@ -352,6 +361,8 @@ class CreepClient(Client, cmd.Cmd):
         if pargs.listfile:
             # Handle install from listfile
             self.install_from_listfile(pargs.listfile)
+
+        return 0
 
     def install_package(self, packagename):
         """Install a package by name"""
@@ -514,6 +525,8 @@ class CreepClient(Client, cmd.Cmd):
         os.remove(os.path.join(savedir, package.get_local_filename()))
         print("Removed mod '{0}' from '{1}'".format(package.name, savedir))
 
+        return 0
+
     def do_stash(self, args):
         """Stash list of installed mods to a saved directory that can be restored later.
 
@@ -542,6 +555,7 @@ class CreepClient(Client, cmd.Cmd):
 
         if len(args) == 0:
             print(self.text_error("Stash: Missing argument <subcommand>"))
+            self.do_help("stash")
             return 1
 
         parser = argparse.ArgumentParser(add_help=False, prog="creep stash")
@@ -579,9 +593,10 @@ class CreepClient(Client, cmd.Cmd):
         if not stashes:
             print(self.text_notify("Looking in {}".format(self.get_stashes_dir())))
             print("No stashes")
+            return 2
 
-        for file in stashes:
-            print(file)
+        for dir_name in stashes:
+            print(dir_name)
 
         return 0
 

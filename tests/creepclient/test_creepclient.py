@@ -356,7 +356,7 @@ def test_install_unknown(capsys):
     client = CreepClient(appdir=APP_DIR)
     result = client.do_install("barnacle-fdsa")
     captured = capsys.readouterr()
-    assert result is None
+    assert result == 0
     assert "Unknown package 'barnacle-fdsa'" in captured.out
 
 
@@ -367,7 +367,7 @@ def test_install(capsys, mocker):
     client = CreepClient(appdir=APP_DIR)
     result = client.do_install("barnacle-fdsa")
     captured = capsys.readouterr()
-    assert result is None
+    assert result == 0
     assert "Unknown package 'barnacle-fdsa'" in captured.out
 
 
@@ -378,7 +378,7 @@ def test_install_no_deps(capsys, mocker):
     client = CreepClient(appdir=APP_DIR)
     result = client.do_install("barnacle-fdsa -n")
     captured = capsys.readouterr()
-    assert result is None
+    assert result == 0
     assert "skipping dependencies" in captured.out
     assert "Unknown package 'barnacle-fdsa'" in captured.out
 
@@ -398,7 +398,7 @@ def test_install_no_deps_valid_package(capsys, mocker):
     client = CreepClient(appdir=APP_DIR)
     result = client.do_install("jer-integration -n")
     captured = capsys.readouterr()
-    assert result is None
+    assert result == 0
     assert "Performing install and skipping dependencies" in captured.out
     assert "Skipping dependency 'mezz/jei'" in captured.out
     assert (
@@ -422,7 +422,7 @@ def test_install_collection(capsys, mocker):
     client = CreepClient(appdir=APP_DIR)
     result = client.do_install("testing-collection")
     captured = capsys.readouterr()
-    assert result is None
+    assert result == 0
     assert "Installing package 'sumpygump/testing-collection (1.0.0)'" in captured.out
     assert "Installing dependency 'mezz/jei'" in captured.out
     assert "Installed collection 'sumpygump/testing-collection'" in captured.out
@@ -443,7 +443,7 @@ def test_install_collection_no_deps(capsys, mocker):
     client = CreepClient(appdir=APP_DIR)
     result = client.do_install("testing-collection -n")
     captured = capsys.readouterr()
-    assert result is None
+    assert result == 0
     assert "Cannot install collection without dependencies." in captured.out
 
 
@@ -459,7 +459,7 @@ def test_install_download_fails(capsys, mocker):
     client = CreepClient(appdir=APP_DIR)
     result = client.do_install("jei")
     captured = capsys.readouterr()
-    assert result is None
+    assert result == 0
     assert "Download failed." in captured.out
 
 
@@ -477,7 +477,7 @@ def test_install_from_list_file(capsys, mocker, sample_mod_list):
     client = CreepClient(appdir=APP_DIR)
     result = client.do_install(" ".join(("--list", sample_filename)))
     captured = capsys.readouterr()
-    assert result is None
+    assert result == 0
     assert "Reading packages from file" in captured.out
     assert "Installing package 'mezz/jei" in captured.out
     assert "Installed mod 'mezz/jei' in" in captured.out
@@ -491,7 +491,7 @@ def test_install_from_list_noexist(capsys):
     client = CreepClient(appdir=APP_DIR)
     result = client.do_install("--list foobar_none.txt")
     captured = capsys.readouterr()
-    assert result is None
+    assert result == 0
     assert "File 'foobar_none.txt' not found." in captured.out
 
 
@@ -512,7 +512,7 @@ def test_install_with_strategy(mocker, capsys):
     client = CreepClient(appdir=APP_DIR)
     result = client.do_install("testing-strategy")
     captured = capsys.readouterr()
-    assert result is None
+    assert result == 0
     assert "Installing package 'sumpygump/testing-strategy" in captured.out
     assert "Installing with strategy: unzip\n" in captured.out
 
@@ -658,5 +658,54 @@ def test_uninstall(capsys):
     client = CreepClient(appdir=APP_DIR)
     result = client.do_uninstall("jei")
     captured = capsys.readouterr()
-    assert result is None
+    assert result == 0
     assert "Removed mod 'mezz/jei' from" in captured.out
+
+
+def test_stash_missing_arg(capsys):
+    """Test the 'stash' command"""
+
+    client = CreepClient(appdir=APP_DIR)
+    result = client.do_stash("")
+    captured = capsys.readouterr()
+    assert result == 1
+    assert "Missing argument <subcommand>" in captured.out
+
+
+def test_stash_list_none(capsys):
+    """Test the 'stash' command"""
+
+    client = CreepClient(appdir=APP_DIR)
+    result = client.do_stash("list")
+    captured = capsys.readouterr()
+    assert result == 2
+    assert "Looking in" in captured.out
+    assert "No stashes" in captured.out
+
+
+def test_stash_list(capsys):
+    """Test the 'stash' command"""
+
+    stashdir = os.path.join(TEST_DIR, "_minecraft", "stashes", "zebra")
+    make_file(os.path.join(stashdir, "mezz_jei_1.20.2-forge-16.0.0.28.jar"))
+    make_file(os.path.join(stashdir, "elephant.jar"))
+
+    client = CreepClient(appdir=APP_DIR)
+    result = client.do_stash("list")
+    captured = capsys.readouterr()
+    assert result == 0
+    assert captured.out == "zebra\n"
+
+
+def test_stash_list_info(capsys):
+    """Test the 'stash' command"""
+
+    stashdir = os.path.join(TEST_DIR, "_minecraft", "stashes", "zebra")
+    make_file(os.path.join(stashdir, "mezz_jei_1.20.2-forge-16.0.0.28.jar"))
+    make_file(os.path.join(stashdir, "elephant.jar"))
+
+    client = CreepClient(appdir=APP_DIR)
+    result = client.do_stash("list")
+    captured = capsys.readouterr()
+    assert result == 0
+    assert captured.out == "zebra\n"
