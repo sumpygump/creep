@@ -709,3 +709,187 @@ def test_stash_list_info(capsys):
     captured = capsys.readouterr()
     assert result == 0
     assert captured.out == "zebra\n"
+
+
+def test_stash_subcommand_invalid(capsys):
+    """Test the 'stash' command"""
+
+    client = CreepClient(appdir=APP_DIR)
+    result = client.do_stash("barnacle")
+    captured = capsys.readouterr()
+    assert result == 1
+    assert "Stash: Invalid subcommand barnacle" in captured.out
+
+
+def test_stash_missing_sub_arg(capsys):
+    """Test the 'stash' command"""
+
+    client = CreepClient(appdir=APP_DIR)
+    result = client.do_stash("save")
+    captured = capsys.readouterr()
+    assert result == 1
+    assert "Stash: Missing argument <stash_name>" in captured.out
+
+
+def test_stash_save(capsys):
+    """Test the 'stash' command"""
+
+    mods_dir = os.path.join(TEST_DIR, "_minecraft", "mods")
+    stash_dir = os.path.join(TEST_DIR, "_minecraft", "stashes")
+    make_file(os.path.join(mods_dir, "mezz_jei_1.20.2-forge-16.0.0.28.jar"))
+    make_file(os.path.join(mods_dir, "elephant.jar"))
+
+    client = CreepClient(appdir=APP_DIR)
+    result = client.do_stash("save willy")
+    captured = capsys.readouterr()
+    assert result == 0
+    stashes = os.listdir(os.path.join(stash_dir, "willy"))
+    assert stashes == ["mezz_jei_1.20.2-forge-16.0.0.28.jar", "elephant.jar"]
+    assert "Will stash the following files into stash willy" in captured.out
+
+
+def test_stash_save_already_exists(capsys):
+    """Test the 'stash' command"""
+
+    stashdir = os.path.join(TEST_DIR, "_minecraft", "stashes", "zebra")
+    make_file(os.path.join(stashdir, "mezz_jei_1.20.2-forge-16.0.0.28.jar"))
+    make_file(os.path.join(stashdir, "elephant.jar"))
+
+    client = CreepClient(appdir=APP_DIR)
+    result = client.do_stash("save zebra")
+    captured = capsys.readouterr()
+    assert result == 1
+    assert "Stash with name zebra already exists." in captured.out
+
+
+def test_stash_info(capsys):
+    """Test the 'stash' command"""
+
+    stashdir = os.path.join(TEST_DIR, "_minecraft", "stashes", "zebra")
+    make_file(os.path.join(stashdir, "mezz_jei_1.20.2-forge-16.0.0.28.jar"))
+    make_file(os.path.join(stashdir, "elephant.jar"))
+
+    client = CreepClient(appdir=APP_DIR)
+    result = client.do_stash("info zebra")
+    captured = capsys.readouterr()
+    assert result == 0
+    assert "Installed mods (in " in captured.out
+    assert "mezz/jei:1.20.2" in captured.out
+    assert "elephant.jar" in captured.out
+
+
+def test_stash_info_none(capsys):
+    """Test the 'stash' command"""
+
+    client = CreepClient(appdir=APP_DIR)
+    result = client.do_stash("info barnacle")
+    captured = capsys.readouterr()
+    assert result == 1
+    assert "No stash with name barnacle" in captured.out
+
+
+def test_stash_apply_none(capsys):
+    """Test the 'stash' command"""
+
+    client = CreepClient(appdir=APP_DIR)
+    result = client.do_stash("apply barnacle")
+    captured = capsys.readouterr()
+    assert result == 1
+    assert "No stash with name barnacle" in captured.out
+
+
+def test_stash_apply(capsys):
+    """Test the 'stash' command"""
+
+    mods_dir = os.path.join(TEST_DIR, "_minecraft", "mods")
+    stash_dir = os.path.join(TEST_DIR, "_minecraft", "stashes", "zebra")
+    make_file(os.path.join(stash_dir, "mezz_jei_1.20.2-forge-16.0.0.28.jar"))
+    make_file(os.path.join(mods_dir, "elephant.jar"))
+
+    client = CreepClient(appdir=APP_DIR)
+    result = client.do_stash("apply zebra")
+    captured = capsys.readouterr()
+    assert result == 0
+
+    # Assert moved over into mods dir, preserving files already there
+    mods_list = os.listdir(mods_dir)
+    assert mods_list == ["mezz_jei_1.20.2-forge-16.0.0.28.jar", "elephant.jar"]
+
+    # Assert the stash dir still is there too
+    stashed_mods = os.listdir(stash_dir)
+    assert stashed_mods == ["mezz_jei_1.20.2-forge-16.0.0.28.jar"]
+    assert "Applying files from stash" in captured.out
+    assert "mezz_jei" in captured.out
+
+
+def test_stash_pop(capsys):
+    """Test the 'stash' command"""
+
+    mods_dir = os.path.join(TEST_DIR, "_minecraft", "mods")
+    stash_dir = os.path.join(TEST_DIR, "_minecraft", "stashes", "zebra")
+    make_file(os.path.join(stash_dir, "mezz_jei_1.20.2-forge-16.0.0.28.jar"))
+    make_file(os.path.join(mods_dir, "elephant.jar"))
+
+    client = CreepClient(appdir=APP_DIR)
+    result = client.do_stash("pop zebra")
+    captured = capsys.readouterr()
+    assert result == 0
+
+    # Assert moved over into mods dir, preserving files already there
+    mods_list = os.listdir(mods_dir)
+    assert mods_list == ["mezz_jei_1.20.2-forge-16.0.0.28.jar", "elephant.jar"]
+
+    # Assert the stash dir still is there too
+    stash_list = os.listdir(os.path.join(TEST_DIR, "_minecraft", "stashes"))
+    assert stash_list == []
+
+    assert "Moving files from stash" in captured.out
+    assert "mezz_jei" in captured.out
+    assert "Deleting stash dir zebra" in captured.out
+
+
+def test_stash_restore(capsys):
+    """Test the 'stash' command"""
+
+    mods_dir = os.path.join(TEST_DIR, "_minecraft", "mods")
+    stash_dir = os.path.join(TEST_DIR, "_minecraft", "stashes", "zebra")
+    make_file(os.path.join(stash_dir, "mezz_jei_1.20.2-forge-16.0.0.28.jar"))
+    make_file(os.path.join(mods_dir, "elephant.jar"))
+
+    client = CreepClient(appdir=APP_DIR)
+    result = client.do_stash("restore zebra")
+    captured = capsys.readouterr()
+    assert result == 0
+
+    # Assert moved over into mods dir, preserving files already there
+    mods_list = os.listdir(mods_dir)
+    assert mods_list == ["mezz_jei_1.20.2-forge-16.0.0.28.jar", "elephant.jar"]
+
+    # Assert the stash dir still is there too
+    stash_list = os.listdir(os.path.join(TEST_DIR, "_minecraft", "stashes"))
+    assert stash_list == []
+
+    assert "Moving files from stash" in captured.out
+    assert "mezz_jei" in captured.out
+    assert "Deleting stash dir zebra" in captured.out
+
+
+def test_purge(capsys):
+    """Test the 'purge' command"""
+
+    mods_dir = os.path.join(TEST_DIR, "_minecraft", "mods")
+    make_file(os.path.join(mods_dir, "mezz_jei_1.20.2-forge-16.0.0.28.jar"))
+    mods_sub_dir = os.path.join(TEST_DIR, "_minecraft", "mods", "subdir")
+    make_file(os.path.join(mods_sub_dir, "fantastic.jar"))
+
+    client = CreepClient(appdir=APP_DIR)
+    result = client.do_purge("")
+    captured = capsys.readouterr()
+    assert result == 0
+
+    # Assert mods dir is now empty
+    mods_list = os.listdir(mods_dir)
+    assert mods_list == []
+
+    assert "Purging all installed mods in" in captured.out
+    assert "Done." in captured.out

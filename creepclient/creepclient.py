@@ -199,15 +199,16 @@ class CreepClient(Client, cmd.Cmd):
         except OSError:
             pass
 
+        library = {}
+        packages = []
+        unknownfiles = []
+
         if not files:
             if display_list:
                 print(self.text_notify(f"Looking in {dir_name}"))
                 print("No mods installed")
-            return False
+            return library
 
-        library = {}
-        packages = []
-        unknownfiles = []
         for name in files:
             if name in ignore:
                 continue
@@ -638,6 +639,8 @@ class CreepClient(Client, cmd.Cmd):
             to_ = os.path.join(stash_dir, file)
             shutil.move(from_, to_)
 
+        return 0
+
     def stash_info(self, stash_name):
         stashes_dir = self.get_stashes_dir()
         stash_dir = os.path.join(stashes_dir, stash_name)
@@ -647,6 +650,7 @@ class CreepClient(Client, cmd.Cmd):
             return 1
 
         self.get_packages_in_dir(stash_dir, display_list=True, include_unknowns=True)
+
         return 0
 
     def restore_stash(self, stash_name, copy_mode=False):
@@ -679,6 +683,8 @@ class CreepClient(Client, cmd.Cmd):
             print("Deleting stash dir {}".format(stash_name))
             shutil.rmtree(stash_dir)
 
+        return 0
+
     def do_purge(self, args):  # pylint: disable=unused-argument
         """Purge all installed packages (mods). Deletes all files from the mods
         directory.
@@ -691,6 +697,8 @@ class CreepClient(Client, cmd.Cmd):
         print("Purging all installed mods in {}...".format(installdir))
         self.delete_path(installdir)
         print("Done.")
+
+        return 0
 
     def do_refresh(self, args):  # pylint: disable=unused-argument
         """Force an refresh of the package repository"""
@@ -705,6 +713,8 @@ class CreepClient(Client, cmd.Cmd):
             )
         )
         print("Count: {} packages.".format(self.repository.count_packages()))
+
+        return 0
 
     def delete_path(self, rootdir):
         files = os.listdir(rootdir)
