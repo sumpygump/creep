@@ -6,6 +6,7 @@ import json
 import os
 import pytest
 import shutil
+import sys
 from unittest import mock
 import urllib.error
 
@@ -49,7 +50,7 @@ def make_tmp_dirs(mocker):
 
     # Always make sure the tests do not use the real user's home directory
     mocker.patch.dict(os.environ, {"HOME": TEST_DIR})
-    os.makedirs(os.path.join(TEST_DIR, ".minecraft"))
+    make_minecraft_dir()
 
     yield cachedir, savedir
 
@@ -60,6 +61,29 @@ def make_tmp_dirs(mocker):
 def clean_up_tmp_dir():
     if os.path.exists(TEST_DIR):
         shutil.rmtree(TEST_DIR)
+
+
+def get_minecraft_dir():
+    if sys.platform[:3] == "win":
+        minecraftdir = os.path.join("AppData", "Roaming", ".minecraft")
+    elif sys.platform == "darwin":
+        minecraftdir = os.path.join("Library", "Application Support", "minecraft")
+    elif sys.platform == "cygwin":
+        minecraftdir = os.path.join(os.getenv("APPDATA"), ".minecraft")
+    else:
+        minecraftdir = ".minecraft"
+
+    return minecraftdir
+
+
+def make_minecraft_dir():
+    os.makedirs(os.path.join(TEST_DIR, get_minecraft_dir()))
+
+
+def rm_minecraft_dir():
+    minecraftdir = os.path.join(TEST_DIR, get_minecraft_dir())
+    if os.path.exists(minecraftdir):
+        shutil.rmtree(minecraftdir)
 
 
 def make_options(options_path, data):
@@ -957,6 +981,9 @@ def test_update_paths():
 
 
 def test_update_paths_win_minecraft_dir_not_found(capsys, mocker):
+    # Remove minecraft dir first so it will be not found
+    rm_minecraft_dir()
+
     mocker.patch.object(creepclient.creepclient, "sys_platform", "win32")
     with pytest.raises(SystemExit) as wrapped_e:
         _ = CreepClient(appdir=APP_DIR)
@@ -977,6 +1004,9 @@ def test_update_paths_win(mocker):
 
 
 def test_update_paths_macos_minecraft_dir_not_found(capsys, mocker):
+    # Remove minecraft dir first so it will be not found
+    rm_minecraft_dir()
+
     mocker.patch.object(creepclient.creepclient, "sys_platform", "darwin")
     with pytest.raises(SystemExit) as wrapped_e:
         _ = CreepClient(appdir=APP_DIR)
@@ -987,8 +1017,6 @@ def test_update_paths_macos_minecraft_dir_not_found(capsys, mocker):
 
 
 def test_update_paths_macos(mocker):
-    os.makedirs(os.path.join(TEST_DIR, "Library", "Application Support", "minecraft"))
-
     mocker.patch.object(creepclient.creepclient, "sys_platform", "darwin")
     client = CreepClient(appdir=APP_DIR)
     assert client.minecraftdir == os.path.join(
@@ -997,6 +1025,9 @@ def test_update_paths_macos(mocker):
 
 
 def test_update_paths_cygwin_minecraft_dir_not_found(capsys, mocker):
+    # Remove minecraft dir first so it will be not found
+    rm_minecraft_dir()
+
     mocker.patch.dict(os.environ, {"APPDATA": os.path.join(TEST_DIR, "wahoo")})
     mocker.patch.object(creepclient.creepclient, "sys_platform", "cygwin")
 
