@@ -9,6 +9,7 @@ import shlex
 import shutil
 import subprocess
 import sys
+from sys import platform as sys_platform
 import tempfile
 import textwrap
 import zipfile
@@ -119,7 +120,6 @@ class CreepClient(Client, cmd.Cmd):
              Set the target minecraft version for mods"""
 
         if len(args) > 0:
-            print("args", args)
             # TODO: Validate against ~/.minecraft/launcher_profiles.json for
             # valid versions to use
             self.minecraft_target = args
@@ -737,10 +737,10 @@ class CreepClient(Client, cmd.Cmd):
         # Check if local packages repository exists and load it too
         local_packages_filename = os.path.join(self.appdir, "local-packages.json")
         if os.path.isfile(local_packages_filename):
-            self.repository.populate("", False)
+            self.repository.populate(should_post_process=False)
             self.repository.populate(local_packages_filename)
         else:
-            self.repository.populate("", True)
+            self.repository.populate(should_post_process=True)
 
     def update_paths(self, appdir=None):
         """Set configured paths utilized by creep client"""
@@ -757,13 +757,15 @@ class CreepClient(Client, cmd.Cmd):
             os.mkdir(os.path.join(self.appdir, "cache"))
 
         # Discover the minecraft dir
-        if sys.platform[:3] == "win":
-            self.minecraftdir = self.get_home_path("AppData\\Roaming\\.minecraft")
-        elif sys.platform == "darwin":
+        if sys_platform[:3] == "win":
             self.minecraftdir = self.get_home_path(
-                "Library/Application Support/minecraft"
+                os.path.join("AppData", "Roaming", ".minecraft")
             )
-        elif sys.platform == "cygwin":
+        elif sys_platform == "darwin":
+            self.minecraftdir = self.get_home_path(
+                os.path.join("Library", "Application Support", "minecraft")
+            )
+        elif sys_platform == "cygwin":
             self.minecraftdir = os.path.join(os.getenv("APPDATA"), ".minecraft")
         else:
             self.minecraftdir = self.get_home_path(".minecraft")

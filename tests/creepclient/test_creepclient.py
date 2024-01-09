@@ -9,6 +9,7 @@ import shutil
 from unittest import mock
 import urllib.error
 
+import creepclient.creepclient
 from creepclient.creepclient import CreepClient
 from creepclient.entity.package import Package
 
@@ -17,7 +18,7 @@ APP_DIR = os.path.join(TEST_DIR, "_creep")
 
 
 @pytest.fixture(autouse=True)
-def make_tmp_dirs():
+def make_tmp_dirs(mocker):
     """Make some tmp dirs for use during testing"""
     tmpbase = TEST_DIR
     if os.path.exists(tmpbase):
@@ -32,7 +33,10 @@ def make_tmp_dirs():
     os.makedirs(savedir, exist_ok=True)
 
     # Add sample packages file
-    shutil.copy("tests/data/packages.json", os.path.join(APP_DIR, "packages.json"))
+    shutil.copy(
+        os.path.join("tests", "data", "packages.json"),
+        os.path.join(APP_DIR, "packages.json"),
+    )
 
     # Define sample user options file
     make_options(
@@ -42,6 +46,10 @@ def make_tmp_dirs():
             "profile_dir": os.path.join(TEST_DIR, "_minecraft"),
         },
     )
+
+    # Always make sure the tests do not use the real user's home directory
+    mocker.patch.dict(os.environ, {"HOME": TEST_DIR})
+    os.makedirs(os.path.join(TEST_DIR, ".minecraft"))
 
     yield cachedir, savedir
 
@@ -121,6 +129,20 @@ def test_client_default_options():
     client = CreepClient(appdir=APP_DIR)
     assert client.minecraft_target == "1.20.1"
     assert client.profiledir != os.path.join(TEST_DIR, "_minecraft")
+
+
+def test_client_with_local_packages():
+    # This has a local package that is loaded into the repository
+    shutil.copy(
+        os.path.join("tests", "data", "local-packages.json"),
+        os.path.join(APP_DIR, "local-packages.json"),
+    )
+
+    client = CreepClient(appdir=APP_DIR)
+    assert client.minecraft_target == "1.20.2"
+    assert client.profiledir == os.path.join(TEST_DIR, "_minecraft")
+    packages = client.repository.search("local-collection")
+    assert packages[0].name == "sumpygump/testing-local-collection"
 
 
 def test_get_attr(capsys):
@@ -893,3 +915,120 @@ def test_purge(capsys):
 
     assert "Purging all installed mods in" in captured.out
     assert "Done." in captured.out
+
+
+def test_refresh(capsys, mocker):
+    """Test the 'refresh' command"""
+
+    package_registry = b""
+    with open(os.path.join("tests", "data", "packages.json"), "rb") as fd:
+        package_registry = fd.read()
+
+    # Mock out the context manager of the urllib request
+    stub_response = mock.MagicMock()
+    stub_response.read.return_value = package_registry
+    stub_context = mock.MagicMock()
+    stub_context.__enter__.return_value = stub_response
+    mocker.patch(
+        "creepclient.entity.package.urllib.request.urlopen", return_value=stub_context
+    )
+
+    client = CreepClient(appdir=APP_DIR)
+    result = client.do_refresh("")
+    captured = capsys.readouterr()
+    assert result == 0
+    assert "Refreshing registry file" in captured.out
+    assert (
+        "Repository updated to version e397849ee30ec3a306b29a9629394a5b" in captured.out
+    )
+
+
+def test_update_paths():
+    client = CreepClient(appdir=APP_DIR)
+    assert APP_DIR in client.appdir
+
+    # This uses default home path to get the .creep app dir
+    client.update_paths()
+    assert ".creep" in client.appdir
+
+    # This will create it because it doesn't exist
+    test_app_dir = os.path.join(TEST_DIR, ".creep")
+    client.update_paths(test_app_dir)
+
+
+def test_update_paths_win_minecraft_dir_not_found(capsys, mocker):
+    mocker.patch.object(creepclient.creepclient, "sys_platform", "win32")
+    with pytest.raises(SystemExit) as wrapped_e:
+        _ = CreepClient(appdir=APP_DIR)
+        assert wrapped_e.type == SystemExit
+        assert wrapped_e.value.code == 2
+        captured = capsys.readouterr()
+        assert "Minecraft dir not found" in captured.out
+
+
+def test_update_paths_win(mocker):
+    os.makedirs(os.path.join(TEST_DIR, "AppData", "Roaming", ".minecraft"))
+
+    mocker.patch.object(creepclient.creepclient, "sys_platform", "win32")
+    client = CreepClient(appdir=APP_DIR)
+    assert client.minecraftdir == os.path.join(
+        TEST_DIR, "AppData", "Roaming", ".minecraft"
+    )
+
+
+def test_update_paths_macos_minecraft_dir_not_found(capsys, mocker):
+    mocker.patch.object(creepclient.creepclient, "sys_platform", "darwin")
+    with pytest.raises(SystemExit) as wrapped_e:
+        _ = CreepClient(appdir=APP_DIR)
+        assert wrapped_e.type == SystemExit
+        assert wrapped_e.value.code == 2
+        captured = capsys.readouterr()
+        assert "Minecraft dir not found" in captured.out
+
+
+def test_update_paths_macos(mocker):
+    os.makedirs(os.path.join(TEST_DIR, "Library", "Application Support", "minecraft"))
+
+    mocker.patch.object(creepclient.creepclient, "sys_platform", "darwin")
+    client = CreepClient(appdir=APP_DIR)
+    assert client.minecraftdir == os.path.join(
+        TEST_DIR, "Library", "Application Support", "minecraft"
+    )
+
+
+def test_update_paths_cygwin_minecraft_dir_not_found(capsys, mocker):
+    mocker.patch.dict(os.environ, {"APPDATA": os.path.join(TEST_DIR, "wahoo")})
+    mocker.patch.object(creepclient.creepclient, "sys_platform", "cygwin")
+
+    with pytest.raises(SystemExit) as wrapped_e:
+        _ = CreepClient(appdir=APP_DIR)
+        assert wrapped_e.type == SystemExit
+        assert wrapped_e.value.code == 2
+        captured = capsys.readouterr()
+        assert "Minecraft dir not found" in captured.out
+
+
+def test_update_paths_cygwin(mocker):
+    mocker.patch.dict(os.environ, {"APPDATA": os.path.join(TEST_DIR, "wahoo")})
+
+    mocker.patch.object(creepclient.creepclient, "sys_platform", "cygwin")
+    os.makedirs(os.path.join(TEST_DIR, "wahoo", ".minecraft"))
+
+    client = CreepClient(appdir=APP_DIR)
+    assert client.minecraftdir == os.path.join(TEST_DIR, "wahoo", ".minecraft")
+
+
+def test_get_home_path(mocker):
+    client = CreepClient(appdir=APP_DIR)
+
+    mocker.patch.dict(os.environ, {"HOME": "wackadoodle"})
+    result = client.get_home_path()
+    assert result == "wackadoodle/"
+
+    mocker.patch.dict(os.environ, {"HOME": "wackadoodle"})
+    result = client.get_home_path("parsley/peanuts")
+    assert result == "wackadoodle/parsley/peanuts"
+
+    mocker.patch.dict(os.environ, {"USERPROFILE": "howdy"}, clear=True)
+    result = client.get_home_path()
+    assert result == "howdy/"

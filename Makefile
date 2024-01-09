@@ -10,6 +10,10 @@ SRC_PATHS=creepclient qi
 # Example: `TFLAGS=-v make tests`
 TFLAGS?=
 
+# Optional argument to pass into pytest
+# Example: `TARG=tests/test_file.py`
+TARG?=
+
 help:
 	@echo "$(ccyellow)------------------------------------------$(ccend)"
 	@echo "$(ccyellow)Creep client makefile$(ccend)"
@@ -18,8 +22,9 @@ help:
 	@echo "  make environment : provision python virtual environment"
 	@echo "  make deps : install python dependencies"
 	@echo "  make lint : run linter"
-	@echo "  make tests : run python tests, uses optional env var TFLAGS"
+	@echo "  make tests : run python tests, uses optional env vars TFLAGS and TARG"
 	@echo "               e.g. 'TFLAGS=-v make tests' will run in verbose mode"
+	@echo "                    'TARG=tests/test_file.py make tests' for single file"
 	@echo "  make coverage : serve up coverage report from last test run"
 	@echo
 
@@ -47,7 +52,7 @@ lint:
 tests:
 	$(if $(value VIRTUAL_ENV),,$(error "First activate environment"))
 	@echo "$(ccyellow)> Running tests...$(ccend)"
-	-coverage run --branch --source=. -m pytest -p no:sugar $(TFLAGS)
+	-coverage run --branch --source=. -m pytest -p no:sugar $(TFLAGS) $(TARG)
 	coverage html --skip-empty
 	@echo
 

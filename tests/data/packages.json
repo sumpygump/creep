@@ -18,7 +18,8 @@
                 "filename": "JER-Integration-4.3.1.jar",
                 "author": "AlasDiablo",
                 "homepage": "https:\/\/www.curseforge.com\/minecraft\/mc-mods\/jer-integration",
-                "url": "https:\/\/edge.forgecdn.net\/files\/4014\/255\/JER-Integration-4.3.1.jar"
+                "url": "https:\/\/edge.forgecdn.net\/files\/4014\/255\/JER-Integration-4.3.1.jar",
+                "installdir": "mods"
             }
         },
         "mezz\/jei": {

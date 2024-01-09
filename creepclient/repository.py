@@ -43,7 +43,7 @@ class Repository:
     minecraft_target = DEFAULT_TARGET
 
     def __init__(self, appdir):
-        self.localdir = os.path.join(appdir, "packages.json")
+        self.local_registry_location = os.path.join(appdir, "packages.json")
 
     def set_minecraft_target(self, target):
         self.minecraft_target = target
@@ -52,8 +52,8 @@ class Repository:
         print(f"Refreshing registry file from {self.remote_url}")
         try:
             with urllib.request.urlopen(self.remote_url, timeout=TIMEOUT) as response:
-                with open(self.localdir, "wb") as f:
-                    f.write(response.read())
+                with open(self.local_registry_location, "wb") as fd:
+                    fd.write(response.read())
         except urllib.error.URLError:
             return False
 
@@ -61,16 +61,16 @@ class Repository:
 
     def load_repository(self):
         # Repository file doesn't exist, fetch it from remote url
-        if not os.path.isfile(self.localdir):
+        if not os.path.isfile(self.local_registry_location):
             if not self.download_remote_repository():
                 print("Package definition file not found or no internet connection.")
                 return {"packages": {}}
-            with open(self.localdir, encoding="utf-8") as fd:
+            with open(self.local_registry_location, encoding="utf-8") as fd:
                 return json.load(fd)
 
         # Check repository file date last modified
         # If it is older than specified time, redownload
-        filetime = os.stat(self.localdir).st_mtime
+        filetime = os.stat(self.local_registry_location).st_mtime
         if filetime + CACHE_EXPIRES < calendar.timegm(time.gmtime()):
             if not self.download_remote_repository():
                 print(
@@ -80,12 +80,12 @@ class Repository:
                     ).format(time.ctime(filetime))
                 )
 
-        with open(self.localdir, encoding="utf-8") as fd:
+        with open(self.local_registry_location, encoding="utf-8") as fd:
             return json.load(fd)
 
     def clear_cache(self):
-        if os.path.isfile(self.localdir):
-            os.remove(self.localdir)
+        if os.path.isfile(self.local_registry_location):
+            os.remove(self.local_registry_location)
 
     def populate(self, location="", should_post_process=True):
         if not location:

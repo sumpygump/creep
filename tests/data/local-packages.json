@@ -1,0 +1,21 @@
+{
+    "packages": {
+        "sumpygump\/testing-local-collection": {
+            "1.20.2-1.0.0": {
+                "name": "sumpygump\/testing-local-collection",
+                "version": "1.0.0",
+                "type": "collection",
+                "description": "Collection local example package",
+                "keywords": "client-side",
+                "require": {
+                    "minecraft": "1.20.2",
+                    "forge": "*",
+                    "mezz\/jei": "*"
+                },
+                "filename": "",
+                "author": "sumpygump",
+                "homepage": "https:\/\/abc.def"
+            }
+        }
+    }
+}
