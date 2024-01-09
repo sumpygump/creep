@@ -765,8 +765,8 @@ def test_stash_save(capsys):
     result = client.do_stash("save willy")
     captured = capsys.readouterr()
     assert result == 0
-    stashes = os.listdir(os.path.join(stash_dir, "willy"))
-    assert stashes == ["mezz_jei_1.20.2-forge-16.0.0.28.jar", "elephant.jar"]
+    stashes = sorted(os.listdir(os.path.join(stash_dir, "willy")))
+    assert stashes == ["elephant.jar", "mezz_jei_1.20.2-forge-16.0.0.28.jar"]
     assert "Will stash the following files into stash willy" in captured.out
 
 
@@ -834,8 +834,8 @@ def test_stash_apply(capsys):
     assert result == 0
 
     # Assert moved over into mods dir, preserving files already there
-    mods_list = os.listdir(mods_dir)
-    assert mods_list == ["mezz_jei_1.20.2-forge-16.0.0.28.jar", "elephant.jar"]
+    mods_list = sorted(os.listdir(mods_dir))
+    assert mods_list == ["elephant.jar", "mezz_jei_1.20.2-forge-16.0.0.28.jar"]
 
     # Assert the stash dir still is there too
     stashed_mods = os.listdir(stash_dir)
@@ -858,8 +858,8 @@ def test_stash_pop(capsys):
     assert result == 0
 
     # Assert moved over into mods dir, preserving files already there
-    mods_list = os.listdir(mods_dir)
-    assert mods_list == ["mezz_jei_1.20.2-forge-16.0.0.28.jar", "elephant.jar"]
+    mods_list = sorted(os.listdir(mods_dir))
+    assert mods_list == ["elephant.jar", "mezz_jei_1.20.2-forge-16.0.0.28.jar"]
 
     # Assert the stash dir still is there too
     stash_list = os.listdir(os.path.join(TEST_DIR, "_minecraft", "stashes"))
@@ -884,8 +884,8 @@ def test_stash_restore(capsys):
     assert result == 0
 
     # Assert moved over into mods dir, preserving files already there
-    mods_list = os.listdir(mods_dir)
-    assert mods_list == ["mezz_jei_1.20.2-forge-16.0.0.28.jar", "elephant.jar"]
+    mods_list = sorted(os.listdir(mods_dir))
+    assert mods_list == ["elephant.jar", "mezz_jei_1.20.2-forge-16.0.0.28.jar"]
 
     # Assert the stash dir still is there too
     stash_list = os.listdir(os.path.join(TEST_DIR, "_minecraft", "stashes"))
