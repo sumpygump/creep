@@ -1018,6 +1018,10 @@ def test_update_paths_macos_minecraft_dir_not_found(capsys, mocker):
 
 def test_update_paths_macos(mocker):
     mocker.patch.object(creepclient.creepclient, "sys_platform", "darwin")
+    os.makedirs(
+        os.path.join(TEST_DIR, "Library", "Application Support", "minecraft"),
+        exist_ok=True,
+    )
     client = CreepClient(appdir=APP_DIR)
     assert client.minecraftdir == os.path.join(
         TEST_DIR, "Library", "Application Support", "minecraft"
