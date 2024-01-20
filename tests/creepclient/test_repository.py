@@ -1,16 +1,13 @@
 """Tests for creepclient repository module"""
 
-import json
 import os
 import pytest
 import shutil
 from unittest import mock
 import urllib.error
 
-# import creepclient.creepclient
 from creepclient.repository import Repository
-
-# from creepclient.entity.package import Package
+from creepclient.entity.package import Package
 
 TEST_DIR = "/tmp/creep-testing"
 
@@ -251,7 +248,10 @@ def test_fetch_package():
     repo = Repository(TEST_DIR)
     repo.minecraft_target = "1.20.2"
     repo.populate()
-    repo.simple_name_packages["jer-integration"].append("another/jer-integration")
+
+    # Make a package with the same name, but different vendor
+    new_package = Package({"name": "another/jer-integration"}, version="1.20.2-0.0.1")
+    repo.simple_name_packages["jer-integration"].append(new_package)
 
     assert repo.fetch_package("") is False
 

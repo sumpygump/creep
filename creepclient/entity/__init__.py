@@ -11,9 +11,9 @@ class Entity(object):
             data = {}
 
         if len(data) > 0:
-            for key, value in data.iteritems():
+            for key, value in data.items():
                 setattr(self, key, value)
 
         if len(kwargs) > 0:
-            for key, value in kwargs.iteritems():
+            for key, value in kwargs.items():
                 setattr(self, key, value)

@@ -38,7 +38,7 @@
                 "homepage": "https:\/\/www.curseforge.com\/minecraft\/mc-mods\/jei",
                 "url": "https:\/\/edge.forgecdn.net\/files\/4767\/571\/jei-1.20.2-forge-16.0.0.28.jar"
             },
-            "1.20.1-1.20.1-forge-15.2.0.22.jar": {
+            "1.20.1-1.20.1-forge-15.2.0.22": {
                 "name": "mezz\/jei",
                 "version": "1.20.1-forge-15.2.0.22.jar",
                 "type": "mod",
