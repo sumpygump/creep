@@ -46,11 +46,9 @@ class Terminfo(object):
         if cap is None:
             return ""
 
-        # Sorry I don't know python well enough yet
-        if len(args) > 1:
-            result = curses.tparm(cap, int(args[0]), int(args[1]))
-        if len(args) == 1:
-            result = curses.tparm(cap, int(args[0]))
+        if len(args) > 0:
+            int_args = [int(x) for x in args]
+            result = curses.tparm(cap, *int_args)
         else:
             result = curses.tparm(cap)
 

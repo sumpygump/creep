@@ -43,6 +43,7 @@ class Repository:
     minecraft_target = DEFAULT_TARGET
 
     def __init__(self, appdir):
+        self.packages = []
         self.local_registry_location = os.path.join(appdir, "packages.json")
 
     def set_minecraft_target(self, target):
@@ -86,6 +87,8 @@ class Repository:
     def clear_cache(self):
         if os.path.isfile(self.local_registry_location):
             os.remove(self.local_registry_location)
+            return True
+        return False
 
     def populate(self, location="", should_post_process=True):
         if not location:
@@ -121,6 +124,8 @@ class Repository:
         if should_post_process:
             self.post_populate()
 
+        return True
+
     def post_populate(self):
         """Processing of packages to occur after population"""
         self.packages.sort(key=attrgetter("name"))
@@ -139,8 +144,7 @@ class Repository:
             package_dict[package.name].append(package)
 
         # Now go through dict and find the latest version of each
-        for name in package_dict:
-            packages = package_dict[name]
+        for _, packages in package_dict.items():
             if len(packages) == 1:
                 package = packages[0]
                 if package.get_minecraft_version() == self.minecraft_target:
@@ -221,12 +225,14 @@ class Repository:
         return False
 
     def search(self, term):
+        term = term.lower()
         results = []
+
         for package in self.unique_packages:
-            if term in re.split(r"\W?", package.name):
+            if term in re.split(r"\W+", package.name):
                 results.append(package)
                 continue
-            if term in package.description.split():
+            if term in package.description.lower().split():
                 results.append(package)
                 continue
             if term in package.keywords:
@@ -236,7 +242,7 @@ class Repository:
         if len(results) == 0:
             # Hmm, no results? try harder
             for package in self.unique_packages:
-                if term in package.name or term in package.description:
+                if term in package.name or term in package.description.lower():
                     results.append(package)
                     continue
 
