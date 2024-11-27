@@ -10,7 +10,7 @@ import urllib.error
 
 from operator import attrgetter
 from .entity.package import Package
-from .config import DEFAULT_TARGET, REMOTE_URL
+from .config import DEFAULT_TARGET, DEFAULT_MODLOADER, REMOTE_URL
 
 # Remote fetching timeout value (in seconds)
 TIMEOUT = 5
@@ -41,6 +41,7 @@ class Repository:
 
     # Currently targeted version of minecraft
     minecraft_target = DEFAULT_TARGET
+    modloader_target = DEFAULT_MODLOADER
 
     def __init__(self, appdir):
         self.packages = []
@@ -48,6 +49,9 @@ class Repository:
 
     def set_minecraft_target(self, target):
         self.minecraft_target = target
+
+    def set_modloader_target(self, target):
+        self.modloader_target = target
 
     def download_remote_repository(self):
         print(f"Refreshing registry file from {self.remote_url}")
@@ -147,13 +151,19 @@ class Repository:
         for _, packages in package_dict.items():
             if len(packages) == 1:
                 package = packages[0]
-                if package.get_minecraft_version() == self.minecraft_target:
+                if (
+                    package.get_minecraft_version() == self.minecraft_target
+                    and package.get_modloader() == self.modloader_target
+                ):
                     self.unique_packages.append(package)
             else:
                 # Filter to only target the targeted minecraft version
                 targeted_version_packages = []
                 for package in packages:
-                    if package.get_minecraft_version() == self.minecraft_target:
+                    if (
+                        package.get_minecraft_version() == self.minecraft_target
+                        and package.get_modloader() == self.modloader_target
+                    ):
                         targeted_version_packages.append(package)
 
                 # Find the latest version

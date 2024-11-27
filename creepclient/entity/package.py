@@ -91,6 +91,10 @@ class Package(Entity):
         """Get the minecraft version for this package"""
         return self.require["minecraft"]
 
+    def get_modloader(self):
+        """Get the mod loader for this package"""
+        return self.require["forge"]
+
     def get_simple_name(self):
         """Get the second name (without the vendor) for a package"""
         return self.name.split("/")[1]

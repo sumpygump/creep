@@ -17,7 +17,7 @@ import zipfile
 from qi.console.client import Client
 from operator import attrgetter
 from .repository import Repository
-from .config import DEFAULT_TARGET
+from .config import DEFAULT_TARGET, DEFAULT_MODLOADER
 
 
 class CreepClient(Client, cmd.Cmd):
@@ -37,6 +37,9 @@ class CreepClient(Client, cmd.Cmd):
 
     # Version of minecraft to target for mods
     minecraft_target = ""
+
+    # Mod loader to target for mods
+    modloader_target = ""
 
     # Whether should install dependencies too
     install_dependencies = True
@@ -93,6 +96,7 @@ class CreepClient(Client, cmd.Cmd):
             options = {}
 
         self.minecraft_target = options.get("minecraft_target", DEFAULT_TARGET)
+        self.modloader_target = options.get("modloader_target", DEFAULT_MODLOADER)
         self.profiledir = options.get("profile_dir", self.minecraftdir)
 
     def save_options(self):
@@ -102,6 +106,7 @@ class CreepClient(Client, cmd.Cmd):
             json.dump(
                 {
                     "minecraft_target": self.minecraft_target,
+                    "modloader_target": self.modloader_target,
                     "profile_dir": self.profiledir,
                 },
                 outfile,
@@ -129,9 +134,31 @@ class CreepClient(Client, cmd.Cmd):
         self.display_target()
         return 0
 
+    def do_modloader(self, args):
+        """View or set the targeted modloader
+        Usage: creep target [modloader]
+
+        Examples:
+          creep modloader
+             Show the current target mod loader
+
+          creep modloader Forge
+             Set the target mod loader for mods"""
+
+        if len(args) > 0:
+            self.modloader_target = args
+            self.repository.set_modloader_target(self.modloader_target)
+            self.save_options()
+
+        self.display_target()
+        return 0
+
     def display_target(self):
         print(
             self.text_success(f"Targetting minecraft version {self.minecraft_target}")
+        )
+        print(
+            self.text_success(f"Targetting modloader {self.modloader_target}"),
         )
 
     def do_profile(self, args):
@@ -733,6 +760,7 @@ class CreepClient(Client, cmd.Cmd):
     def create_repository(self):
         self.repository = Repository(self.appdir)
         self.repository.set_minecraft_target(self.minecraft_target)
+        self.repository.set_modloader_target(self.modloader_target)
 
         # Check if local packages repository exists and load it too
         local_packages_filename = os.path.join(self.appdir, "local-packages.json")
