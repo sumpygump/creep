@@ -11,7 +11,7 @@
                 "keywords": "map-and-information, addons",
                 "require": {
                     "minecraft": "1.20.2",
-                    "forge": "*",
+                    "forge": "NeoForge",
                     "mezz\/jei": "*",
                     "way2muchnoise\/just-enough-resources-jer": "*"
                 },
@@ -31,7 +31,7 @@
                 "keywords": "api-and-library, map-and-information",
                 "require": {
                     "minecraft": "1.20.2",
-                    "forge": "*"
+                    "forge": "NeoForge"
                 },
                 "filename": "jei-1.20.2-forge-16.0.0.28.jar",
                 "author": "mezz",
@@ -46,7 +46,7 @@
                 "keywords": "api-and-library, map-and-information",
                 "require": {
                     "minecraft": "1.20.1",
-                    "forge": "*"
+                    "forge": "NeoForge"
                 },
                 "filename": "jei-1.20.1-forge-15.2.0.22.jar",
                 "author": "mezz",
@@ -63,7 +63,7 @@
                 "keywords": "client-side",
                 "require": {
                     "minecraft": "1.20.2",
-                    "forge": "*",
+                    "forge": "NeoForge",
                     "mezz\/jei": "*",
                     "alasdiablo\/jer-integration": "*"
                 },
@@ -81,7 +81,7 @@
                 "keywords": "testing",
                 "require": {
                     "minecraft": "1.20.2",
-                    "forge": "*"
+                    "forge": "NeoForge"
                 },
                 "filename": "archive1.zip",
                 "installstrategy": "unzip",

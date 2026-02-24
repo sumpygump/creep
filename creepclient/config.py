@@ -14,4 +14,4 @@ REMOTE_URL = os.getenv("CREEP_REMOTE_URL", CANONICAL_REMOTE_URL)
 DEFAULT_TARGET = "1.20.1"
 
 # The default modloader to target for mods
-DEFAULT_MODLOADER = "Forge"
+DEFAULT_MODLOADER = "NeoForge"

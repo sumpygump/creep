@@ -44,6 +44,7 @@ def make_tmp_dirs(mocker):
         os.path.join(APP_DIR, "options.json"),
         {
             "minecraft_target": "1.20.2",
+            "modloader_target": "NeoForge",
             "profile_dir": os.path.join(TEST_DIR, "_minecraft"),
         },
     )
@@ -91,6 +92,7 @@ def make_options(options_path, data):
         json.dump(
             {
                 "minecraft_target": data.get("minecraft_target", ""),
+                "modloader_target": data.get("modloader_target", ""),
                 "profile_dir": data.get("profile_dir", ""),
             },
             outfile,
@@ -144,6 +146,7 @@ def test_client():
     assert client.version != "0.2"
     assert client.appdir == APP_DIR
     assert client.minecraft_target == "1.20.2"
+    assert client.modloader_target == "NeoForge"
     assert client.profiledir == os.path.join(TEST_DIR, "_minecraft")
 
 
@@ -152,6 +155,7 @@ def test_client_default_options():
     os.unlink(os.path.join(APP_DIR, "options.json"))
     client = CreepClient(appdir=APP_DIR)
     assert client.minecraft_target == "1.20.1"
+    assert client.modloader_target == "NeoForge"
     assert client.profiledir != os.path.join(TEST_DIR, "_minecraft")
 
 
@@ -219,6 +223,26 @@ def test_target_set(capsys):
 
     client = CreepClient(appdir=APP_DIR)
     assert client.minecraft_target == "1.20.2"
+
+
+def test_modloader(capsys):
+    """Test the 'modloader' command"""
+    client = CreepClient(appdir=APP_DIR)
+    client.do_modloader("")
+    captured = capsys.readouterr()
+    assert "Targetting modloader" in captured.out
+
+
+def test_modloader_set(capsys):
+    """Test the 'modloader' command"""
+    client = CreepClient(appdir=APP_DIR)
+    client.do_modloader("NeoForge")
+    captured = capsys.readouterr()
+    assert "Targetting modloader NeoForge" in captured.out
+    assert client.modloader_target == "NeoForge"
+
+    client = CreepClient(appdir=APP_DIR)
+    assert client.modloader_target == "NeoForge"
 
 
 def test_profile(capsys):
